@@ -4,7 +4,6 @@
 1781404/1 	Muhumuza, Isaac 	isaac.muhumuza@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
 1801643/1 	Alghamdi, Samah 	samah.alghamdi@kcl.ac.uk 	Current 	Computing And Security 	
 1804098/1 	Song, Yingdi 	yingdi.song@kcl.ac.uk 	Current 	Computing And Security 	
-1804202/1 	Jiang, Haocheng 	haocheng.jiang@kcl.ac.uk 	Current 	Robotics 	
 1805051/1 	Bai, Xiaoxue 	xiaoxue.bai@kcl.ac.uk 	Current 	Computing And Security 	
 1805081/1 	He, Xi 	xi.he@kcl.ac.uk 	Current 	Computing And Security 	
 1808157/1 	Wu, Jian 	jian.wu@kcl.ac.uk 	Current 	Robotics 	
@@ -17,7 +16,6 @@
 1817456/2 	Zhu, Tianning 	tianning.zhu@kcl.ac.uk 	Current 	Web Intelligence 	
 1819508/2 	Qi, Zhipeng 	zhipeng.qi@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
 1819642/1 	Zhou, Jiawei 	jiawei.zhou@kcl.ac.uk 	Current 	Intelligent Systems 	
-1819943/1 	Zhang, Zhejian 	zhejian.zhang@kcl.ac.uk 	Current 	Web Intelligence 	
 1820495/1 	Fu, Zifei 	zifei.fu@kcl.ac.uk 	Current 	Computing And Internet Systems 	
 1820816/1 	Zhang, Boyang 	boyang.zhang@kcl.ac.uk 	Current 	Computing And Security 	
 1821274/1 	Liu, Huikang 	huikang.liu@kcl.ac.uk 	Current 	Computing And Security 	
