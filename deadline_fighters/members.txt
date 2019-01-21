@@ -3,3 +3,4 @@
 1863966/1 	Chen, Lili 	lili.chen@kcl.ac.uk 	Current 	Advanced Software Engineering With Management	
 1823375/1 	Wang, Letao 	letao.wang@kcl.ac.uk 	Current 	Advanced Software Engineering	
 1822373/1 	Zhou, Qilin 	qilin.zhou@kcl.ac.uk 	Current 	Advanced Software Engineering	
+1816977/1 	Fidarov, Georgii 	georgii.fidarov@kcl.ac.uk 	Current 	Robotics 
