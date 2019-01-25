@@ -9,7 +9,6 @@
 1805081/1 	He, Xi 	xi.he@kcl.ac.uk 	Current 	Computing And Security 	
 1814237/1 	Zhu, Yu 	yu.2.zhu@kcl.ac.uk 	Current 	Advanced Software Engineering 	
 1815031/1 	Osei-Bonsu, Yusaf 	yusaf.osei-bonsu@kcl.ac.uk 	Current 	Advanced Software Engineering 	
-1815357/2 	Liu, Dong 	dong.2.liu@kcl.ac.uk 	Current 	Intelligent Systems 	
 1815517/1 	Jin, Kunxiang 	kunxiang.jin@kcl.ac.uk 	Current 	Advanced Software Engineering 	
 1816772/2 	Ji, Dongang 	dongang.ji@kcl.ac.uk 	Current 	Advanced Software Engineering 	
 1816977/1 	Fidarov, Georgii 	georgii.fidarov@kcl.ac.uk 	Current 	Robotics 	
