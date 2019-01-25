@@ -1,12 +1,12 @@
 1400477/1 	Ganguly, Sandipan 	sandipan.ganguly@kcl.ac.uk 	Current 	Intelligent Systems 	
 1529757/1 	MacLean, Cameron Ian 	cameron.maclean@kcl.ac.uk 	Current 	Computing And Security 	
 1542196/3 	Sarosi, Marcell 	marcell.sarosi@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
+1771754/1 	Au Yeung, Ka Hang Jacky 	ka_hang_jacky.au_yeung@kcl.ac.uk 	Current 	Computing And Security 	
 1781404/1 	Muhumuza, Isaac 	isaac.muhumuza@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
 1801643/1 	Alghamdi, Samah 	samah.alghamdi@kcl.ac.uk 	Current 	Computing And Security 	
 1804098/1 	Song, Yingdi 	yingdi.song@kcl.ac.uk 	Current 	Computing And Security 	
 1805051/1 	Bai, Xiaoxue 	xiaoxue.bai@kcl.ac.uk 	Current 	Computing And Security 	
 1805081/1 	He, Xi 	xi.he@kcl.ac.uk 	Current 	Computing And Security 	
-1808157/1 	Wu, Jian 	jian.wu@kcl.ac.uk 	Current 	Robotics 	
 1814237/1 	Zhu, Yu 	yu.2.zhu@kcl.ac.uk 	Current 	Advanced Software Engineering 	
 1815031/1 	Osei-Bonsu, Yusaf 	yusaf.osei-bonsu@kcl.ac.uk 	Current 	Advanced Software Engineering 	
 1815357/2 	Liu, Dong 	dong.2.liu@kcl.ac.uk 	Current 	Intelligent Systems 	
@@ -33,9 +33,7 @@
 1834878/1 	Zhu, Zhihao 	zhihao.zhu@kcl.ac.uk 	Current 	Web Intelligence 	
 1834882/1 	Xu, Yiran 	yiran.xu@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
 1836287/1 	Wu, Zihao 	zihao.1.wu@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
-1837795/1 	Bai, Shuwen 	shuwen.bai@kcl.ac.uk 	Current 	Intelligent Systems 	
 1839502/1 	Liu, Yibo 	yibo.liu@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
-1842323/2 	Fu, Yongwei 	yongwei.fu@kcl.ac.uk 	Current 	Intelligent Systems 	
 1842973/1 	Yu, Ying 	ying.yu@kcl.ac.uk 	Current 	Computing And Security 	
 1844334/1 	Zhan, Xiao 	xiao.zhan@kcl.ac.uk 	Current 	Computing And Security 	
 1845291/1 	He, Bo 	bo.he@kcl.ac.uk 	Current 	Advanced Software Engineering 	
@@ -43,7 +41,6 @@
 1845664/1 	Subramanian, Sivaranjani 	sivaranjani.subramanian@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
 1846353/1 	Hwang, Jihye 	jihye.hwang@kcl.ac.uk 	Current 	Advanced Software Engineering 	
 1848348/1 	Li, Kexin 	kexin.3.li@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
-1853913/2 	Bao, Yigang 	yigang.bao@kcl.ac.uk 	Current 	Intelligent Systems 	
 1862457/1 	Krairit, Chayanit 	chayanit.krairit@kcl.ac.uk 	Current 	Computing And Internet Systems 	
 1862819/1 	Fu, Yixin 	yixin.fu@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
 1863752/2 	Li, Yan 	yan.1.li@kcl.ac.uk 	Current 	Intelligent Systems 	
@@ -63,4 +60,3 @@
 1880679/1 	Robinson, Thomas James 	thomas.robinson@kcl.ac.uk 	Current 	Web Intelligence 	
 1881242/1 	Li, Haonan 	haonan.li@kcl.ac.uk 	Current 	Computing And Internet Systems 	
 1883689/1 	Tyagi, Shefali 	shefali.tyagi@kcl.ac.uk 	Current 	Advanced Software Engineering With Management 	
-1771754/1 	Au Yeung, Ka Hang Jacky 	ka_hang_jacky.au_yeung@kcl.ac.uk
