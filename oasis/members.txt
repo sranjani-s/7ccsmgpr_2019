@@ -4,3 +4,4 @@
 1877520/1 	Chen, Yankai 	yankai.chen@kcl.ac.uk 	Current 	Computing And Internet Systems 
 1834878/1 	Zhu, Zhihao 	zhihao.zhu@kcl.ac.uk 	Current 	Web Intelligence 	
 1819642/1 	Zhou, Jiawei 	jiawei.zhou@kcl.ac.uk 	Current 	Intelligent Systems 
+1815357/2 	Liu, Dong 	dong.2.liu@kcl.ac.uk 	Current 	Intelligent Systems
