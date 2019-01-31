@@ -1,1 +1,1 @@
-https://github.com/zhutianning/multi-host-file-synchroniser
+https://github.com/Yathing/multi-host-file-synchroniser
