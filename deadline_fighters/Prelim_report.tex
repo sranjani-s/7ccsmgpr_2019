@@ -1,27 +1,75 @@
-\documentclass[10.25pt,a4paper,oneside]{article}
+\documentclass[a4paper]{article}
+
 \usepackage[a4paper,top=0.4in,left=0.4in,right=0.4in,bottom=0.4in]{geometry}
 \usepackage{graphicx}
 \usepackage{rotating}
-\usepackage{hyperref}
+
+
 \usepackage{setspace}
 \usepackage{float}
 \graphicspath{ {./images/} }
-\pagenumbering{gobble}
-\hypersetup{
-	colorlinks=true,
-	urlcolor=blue
-}
 
-\urlstyle{same}x
+\usepackage{tabularx,ragged2e,booktabs,caption}
+\newcolumntype{C}[1]{>{\Centering}m{#1}}
+\renewcommand\tabularxcolumn[1]{C{#1}}
+
+\usepackage{titling}
+\setlength{\droptitle}{-10em}
+
+\title{Group Project - 7CCSMGPR \hspace{0.5 cm}Deadline Fighters}
+\renewcommand\maketitlehookc{\vspace{-10ex}}
 
 \begin{document}
+
 {\setstretch{0.75}
 \begin{center}
-	\textsc{Group Project - 7CCSMGPR}
+		\LARGE{Group Project - 7CCSMGPR}
 \end{center}
 \begin{center}
-	\hspace{0.5cm} Deadline Fighters \hspace{0.5 cm} Preliminary report - February 8, 2019
+		\hspace{0.5cm} Deadline Fighters \hspace{0.5 cm} Preliminary report - February 8, 2019
 \end{center}
+
+
+\section{Aim}
+Our team, \emph{Deadline Fighters}, aim to develop a multi-host file synchronizer which can:
+\begin{itemize}
+\item{allow upload and download of files from a central server (hub) through client applications with necessary authorization.}
+\item{automatically synchronize changes made by client applications unto the corresponding copy of the file in the server.}
+\item{handle all possible conflict/non-conflict scenarios of file synchronization (ie. combinations of Create, Edit, Rename, Delete) involving multiple client applications.}
+\item{enable file sychronization through both desktop (all platform) and mobile (Android) clients.}
+\end{itemize}
+
+\section{Strategy}
+\begin{figure}[H]
+	\centering
+	\textbf{High level workflow}
+	\includegraphics[width=\linewidth]{1.png}
+	\caption{Flow of control between client and server}
+\end{figure}\par
+In our Agile workflow, we will start by building a basic prototype of the desktop client. This prototype will perform functionalities of Create, Edit, Rename and Delete for non-conflicting files for single user. It will also have a \emph{Upload} and \emph{Download} button to manually invoke synchronization. Then we will extend this prototype to handle conflict scenarios. The potential conflict scenarios and their resolution are stated in table \ref{table:conflict}.
+
+Once the conflict resolution algorithm implementation is stable, we will develop the mobile client prototype followed by testing conflict resolution using mobile-desktop client pair. After satisfactory testing, we will move to the final phase of introducing automatic file sync using \emph{file system notification} and \emph{server polling}.
+
+\begin{minipage}{\linewidth}
+\centering
+\captionof{table}{Conflict scenarios and resolutions} \label{table:conflict}
+\begin{tabular}[H]{|C{0.75cm}|C{2.25cm}|C{2.25cm}|C{6cm}|}\toprule[1.5pt]
+\bf No. & \bf Operation 1 & \bf Operation 2 & \bf Resolution\\\midrule
+1       &  Create 	& Create     		&  \begin{flushleft}Upload both files, one with the original name and one with a prefix (eg. (1) or 'copy')\end{flushleft}\\\hline
+2       &  Create   & Edit       		&  \begin{flushleft}Upload edit changes to the original file and upload new file with a prefix (eg. (1) or 'copy')\end{flushleft}\\\hline
+3       &  Create   & Rename      		&  \begin{flushleft}Rename is applied first followed by upload of new file\end{flushleft}\\\hline
+4       &  Create   & Delete     		&  \begin{flushleft}Delete file first and then upload the newly created file\end{flushleft}\\\hline
+5       &  Edit		& Edit      		&  \begin{flushleft}Possible strategies: \begin{itemize} \item{Send server error for both requests} \item{Upload two copies of the file, each with different edits} \end{itemize}\end{flushleft}\\\hline
+6       &  Edit		& Rename      		&  \begin{flushleft}Rename original file and upload document with edited changes as a new file\end{flushleft}\\\hline
+7       &  Edit		& Delete      		&  \begin{flushleft}Delete original file and upload document with edited changes as a new file\end{flushleft}\\\hline
+8       &  Rename   & Rename      		&  \begin{flushleft}Rename original file on server to name1 and upload another copy of the file with name2\end{flushleft}\\\hline
+9       &  Rename   & Delete      		&  \begin{flushleft}Delete original file and upload another copy of the file with the new name\end{flushleft}\\\hline
+10      &  Delete   & Delete      		&  \begin{flushleft}No conflict\end{flushleft}\\
+\bottomrule[1.25pt]
+\end {tabular}\par
+\bigskip
+\emph{Operation 1 and 2 are performed on/for files with the same name by same/different users from different devices.}
+\end{minipage}
 
 \section{Tools/Technology}
 At first, we use GitHub for code hosting, GitHub is a hosting platform for open source and proprietary software projects. It benefits for the team work projects because every member in the team can modify code and pull requests.\\\\
@@ -41,11 +89,9 @@ There are two types of meeting that the team will be held. The first type is hel
 The other type is held between 1-2 days and this is not for all members but between the members who have the same tasks assigned from last week. This meeting usually does not involve the decision making but the attendance review what they have do after last daily meeting. It lasts for not longer than 5 minutes.\\\\
 All team members should push at least one commit every two days. Once a member pulls request on the git, at least 2 members should view changes and approve before it merges on the master branch of the repository. If some members request changes, the member who pulls request should be fixed or give a satisfactory explanation to these changes.
 
-
-}
 \begin{sidewaysfigure}
 \includegraphics[scale=0.4]{Timeline_Ver_0}
 \caption{This is Gantt chart which illustrates the plan of our group within 10 weeks.}
 \end{sidewaysfigure}
+}
 \end{document}
-
