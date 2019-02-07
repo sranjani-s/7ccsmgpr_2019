@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AWS S3 File Upload</title>
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.395.0.min.js"></script> 
+    <script src="index.js"></script>    
+</head>
+<body>
+    <input id="selectfile" type="file"/>
+	<button id="fileupload">Upload</button>
+	<p id="results"><p></p>
+
+    <script type="text/javascript">
+		/// Load the SDK for JavaScript
+       // var AWS = require('aws-sdk');
+        //login aws by using credentials to upload
+        AWS.config.update({
+            accessKeyId: 'xxx',//use individual accessKeyId
+			secretAccessKey: 'xxxx'//use individual secretAccessKey
+        });
+        //set region
+        AWS.config.region = 'us-east-2'; 
+		// create bucket instance
+        
+     /* $("#downloadButton").click(function(){
+        var s3 = new AWS.S3();
+        s3.getObject(
+            { Bucket: "deadlinefighters", Key: "card.jpg" },
+        function (error, data) {
+        if (error != null) {
+        alert("Failed to retrieve an object: " + error);
+         } else {
+        alert("Loaded " + data.ContentLength + " bytes");
+        // do something with data.Body
+    }
+  }
+);       }*/
+        
+      
+       var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});  //select which bucket to upload
+		var selectFile = document.getElementById('selectfile');
+		var upload = document.getElementById('fileupload');
+		var results = document.getElementById('results');
+        upload.addEventListener('click', function () {
+			var file = selectFile.files[0];
+			if (file) {
+				results.innerHTML = '';
+				var path = {Key: file.name, ContentType: file.type, Body: file, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'}; //set the related path of bucket, set body as file, ACL as public
+				bucket.upload(path, function (err, data) {
+					console.log(err);  //print error if failed
+					results.innerHTML = err ? 'ERROR!' : 'The file is uploaded.';
+				});
+			} else {
+				results.innerHTML = 'Please select a file.';
+			}
+		}, false);
+
+        
+    </script>
+</body>
+</html>
