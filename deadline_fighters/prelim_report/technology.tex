@@ -1,9 +1,25 @@
 \section{Tools/Technology}
-At first, we use GitHub for code hosting, GitHub is a hosting platform for open source and proprietary software projects. It benefits for the team work projects because every member in the team can modify code and pull requests.\\\\
-We need to write documents use LaTex , Overleaf is an online LaTex editor that we make use of.\\\\
-Before coding, we apply Mockingbot to design user interface and set standards for what the clients will look like.\\\\
-For the server, we use Amazon S3, it is a simple cloud storage service. The main reason we use that instead of virtual machine is security, Amazon S3 uses the Advanced Encryption Standard for 256 bits, AES can quickly encrypt and decrypt in software and hardware. When accessKeyID and secretKeyID are exposed to public, the Amazon S3 will send an email to user.\\\\
-For the desktop client, we plan to use JavaScript/html/CSS language and the editor is Visual studio code. The structure we use is electron because it integrates \emph{Chromium} and \emph{Node.js} very well together, interfaces and algorithms can be combined in an orderly manner.\\\\
-For the mobile client, we use Java on Android studio platform. And for the database, we use Structured Query Language on MySQL.\\\\
-At the step of web debugging, we decide to use Charles. Charles is a HTTP proxy server, when the users send requests to server or get responses from server, Charles can monitor all data.\\\\
-Testing is a critical part, we decide to use unit test and we preliminarily use Mocha and Junit. Mocha is a testing tool for JavaScript, it is more flexible than other test frameworks. Junit is the most basic testing structure for Java, we should apply it to test mobile client.
+We will use the following tools and technology for the corresponding purposes:
+\begin{itemize}
+
+\item \textbf{Amazon S3}: We use S3 as our cloud/server endpoint. S3 provides APIs for Javascript and Java which we will exploit for our desktop and mobile client respectively. S3 handles encryption and notifies us of any potential vulnerabilities.
+
+\item \textbf{Electron/Javascript}: For building the desktop application. It uses \emph{Chromium} and \emph{Node.js} on the backend and helps convert web application code (HTML/CSS) into desktop app.
+
+\item \textbf{Android Studio}: For building mobile client.
+
+\item \textbf{MySQL}: For Database. Note: We have not investigated other possibilities in depth at the moment and thus this choice is open for changes.
+
+\item \textbf{Charles}: For web debugging. This will help us debug server calls as well as help simulate conflict scenarios.
+
+\item \textbf{Mocha \& JUnit}: For writing unit tests on Javascript and Java respectively.
+
+\item \textbf{GitHub + Git Bash/terminal}: Version control and code collaboration. We have created an organisation called \emph{deadlinefighters} of which everyone is a part of. Everyone has write access whereas \emph{Sivaranjani} and \emph{Letao Wang} have administrative privileges.
+
+\item \textbf{Atom}: We use Atom as our code/text editor as it has Git and {\LaTeX} compatibility, giving us a single view of our important tools.
+
+\item \textbf{{\LaTeX}}: We use {\LaTeX} for documentation and our {\LaTeX} file is also collaborated on GitHub. Every team member has {\LaTeX} compiler installed in their system along with a plugin for {\LaTeX} on Atom which helps compile while on the text editor.
+
+\item \textbf{MockingBot}: MockingBot is used for the designing user interface of our desktop and mobile client. This will help streamline developer efforts.
+
+\end{itemize}

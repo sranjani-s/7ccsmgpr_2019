@@ -1,5 +1,31 @@
 \section{Team protocol}
-The main method the team choose is that agile software developing, which means that the development is iterative and step-by-step. The project divided into several individual small projects and during developing these small projects, it goes through the requirement, plan, design, development, tests, deploy, review and then go to the next small project.\\\\
-There are two types of meeting that the team will be held. The first type is held every week which all members should attend. During this meeting all the team members review the work done last week finding the potential problems and planning for the next week. It usually lasts for 1 hour.\\\\
-The other type is held between 1-2 days and this is not for all members but between the members who have the same tasks assigned from last week. This meeting usually does not involve the decision making but the attendance review what they have do after last daily meeting. It lasts for not longer than 5 minutes.\\\\
-All team members should push at least one commit every two days. Once a member pulls request on the git, at least 2 members should view changes and approve before it merges on the master branch of the repository. If some members request changes, the member who pulls request should be fixed or give a satisfactory explanation to these changes.
+
+Our software engineering methodology will be agile, which means that our development is iterative and spread across \emph{sprints}. The project divided into several milestones, each will be the aim for one or more sprints. Every sprint lasts for one week and involves requirement collection, planning, design, development, testing, deployment and review.\\
+
+There are two types of meeting that the team will be held:
+
+\begin{itemize}
+
+\item The first type is held every week and is attended by all members. During this meeting, team members will review the work done last week, discuss the problems encountered as well as potential problems and plan for the week ahead. This meeting usually lasts for 1 hour.
+
+\item The other type is held every 1-2 days. This is not for all members but only for members who have the same/related tasks assigned in the current sprint. This meeting usually does not involve major decision making but reviews members' progress since last meeting. This is our \emph{scrum meeting} and lasts no longer than 5 minutes.
+
+\end{itemize}
+
+Other rules framed on consensus include:
+
+\begin{itemize}
+
+\item All team members should push at least one commit every three days.
+
+\item Once a member raises a pull request on the git, at least 2 members should view the changes and approve it.
+
+\item If some members request changes, the member who raised the pull request make necessary fix or give a satisfactory explanation to not incorporate the changes.
+
+\item There are two feature branches: \emph{desktop-client} and \emph{mobile-client} where desktop and mobile client development will be tracked respectively. On achieving some milestones, we will merge these feature branches into master branch.
+
+\item Every team member who introduces new code will also author unit tests and relevant documentation as necessary.
+
+\item \textbf{Definition of feature complete}: A feature is marked complete when the necessary coding work is done, thoroughly tested and has 0 major/critical bugs and necessary documentation is complete.
+
+\end{itemize}
