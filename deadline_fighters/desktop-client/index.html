@@ -9,7 +9,8 @@
     <input id="selectfile" type="file"/>
 	<button id="fileupload">Upload</button>
 	<p id="results"><p></p>
-
+    <br>
+	<button id="download-button">Download</button>
     <script type="text/javascript">
 		/// Load the SDK for JavaScript
        // var AWS = require('aws-sdk');
@@ -40,6 +41,7 @@
        var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});  //select which bucket to upload
 		var selectFile = document.getElementById('selectfile');
 		var upload = document.getElementById('fileupload');
+		var download = document.getElementById('download-button');
 		var results = document.getElementById('results');
         upload.addEventListener('click', function () {
 			var file = selectFile.files[0];
@@ -55,6 +57,42 @@
 			}
 		}, false);
 
+		
+		
+//download		
+var fs = require('fs');		
+var FilePath = '/2.docx';
+var bucket1 = 'deadlinefighters';
+var key = '2.docx';
+var down_load = new AWS.S3();
+		
+//		var s3 = new AWS.S3({params1: {Bucket: 'deadlinefighters', Key: 'aws.png'}});
+		download.addEventListener('click', function(){	
+//			s3.getObject(
+//    function (error, data) {
+//    if (error != null) {
+//      alert("Failed to retrieve an object: " + error);
+//    } else {
+//      alert("Loaded " + data.ContentLength + " bytes");
+//      // do something with data.Body
+//    }
+//  }
+//);		
+	var downloadFile = (FilePath, bucket1, key) => {
+    var params1 = {
+        Bucket: bucket1,
+        Key: key
+    };
+		down_load.getObject(params1, (err, data) => {
+        if (err) console.error(err)
+        fs.writeFileSync(FilePath, data.Body.toString())
+    })
+}
+downloadFile(FilePath, bucket1, key);		
+		});
+		
+		
+		
         
     </script>
 </body>
