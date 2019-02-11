@@ -11,6 +11,10 @@
 	<p id="results"><p></p>
     <br>
 	<button id="download-button">Download</button>
+	<br>
+	<button id="delete-button">Delete</button>
+	
+	
     <script type="text/javascript">
 		/// Load the SDK for JavaScript
        // var AWS = require('aws-sdk');
@@ -42,6 +46,7 @@
 		var selectFile = document.getElementById('selectfile');
 		var upload = document.getElementById('fileupload');
 		var download = document.getElementById('download-button');
+		var del = document.getElementById('delete-button');
 		var results = document.getElementById('results');
         upload.addEventListener('click', function () {
 			var file = selectFile.files[0];
@@ -61,9 +66,9 @@
 		
 //download		
 var fs = require('fs');		
-var FilePath = '/2.docx';
+var FilePath1 = '/test.docx';
 var bucket1 = 'deadlinefighters';
-var key = '2.docx';
+var key1 = 'test.docx';
 var down_load = new AWS.S3();
 		
 //		var s3 = new AWS.S3({params1: {Bucket: 'deadlinefighters', Key: 'aws.png'}});
@@ -78,18 +83,55 @@ var down_load = new AWS.S3();
 //    }
 //  }
 //);		
-	var downloadFile = (FilePath, bucket1, key) => {
+	var downloadFile = (FilePath1, bucket1, key1) => {
     var params1 = {
         Bucket: bucket1,
-        Key: key
+        Key: key1
     };
 		down_load.getObject(params1, (err, data) => {
         if (err) console.error(err)
-        fs.writeFileSync(FilePath, data.Body.toString())
+        fs.writeFileSync(FilePath1, data.Body.toString())
     })
 }
-downloadFile(FilePath, bucket1, key);		
+downloadFile(FilePath1, bucket1, key1);		
 		});
+		
+
+		
+		
+//delete - only can delete local file now!!!
+var FilePath2 = '/123.txt';
+var bucket2 = 'deadlinefighters';
+var key2 = '123.txt';
+var dele_te = new AWS.S3();
+del.addEventListener('click', function(){
+	
+//	fs.unlink(FilePath2,function (err) {
+//    if(err){
+//        return console.log(err);
+//    }else {
+//        console.log("delete sucessfully");
+//    }
+//})
+	
+	var deleteFile = (FilePath2, bucket2, key2) => {
+	var params2 = {
+		Bucket: bucket2,
+		Key: key2
+	};
+	dele_te.getObject(params2, (err, data) => {
+        	fs.unlink(FilePath2,function (err) {
+    if(err){
+        return console.log(err);
+    }else {
+        console.log("delete sucessfully");
+    }
+})
+    })			
+}
+deleteFile(FilePath2, bucket2, key2);		
+});		
+		
 		
 		
 		
