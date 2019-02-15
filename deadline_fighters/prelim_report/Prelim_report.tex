@@ -1,0 +1,37 @@
+\documentclass[a4paper]{article}
+
+\usepackage[a4paper,top=0.4in,left=0.4in,right=0.4in,bottom=0.4in]{geometry}
+\usepackage{graphicx}
+\usepackage{rotating}
+
+
+\usepackage{setspace}
+\usepackage{float}
+\graphicspath{ {./images/} }
+
+\usepackage{tabularx,ragged2e,booktabs,caption}
+\newcolumntype{C}[1]{>{\Centering}m{#1}}
+\renewcommand\tabularxcolumn[1]{C{#1}}
+
+\usepackage{titling}
+\setlength{\droptitle}{-10em}
+
+\usepackage{xr} %Used for cross-referencing in strategy.tex
+
+\title{Group Project - 7CCSMGPR \hspace{0.5 cm}Deadline Fighters}
+\renewcommand\maketitlehookc{\vspace{-10ex}}
+
+\begin{document}
+
+{\setstretch{0.75}
+\input{cover.tex}
+\newpage
+\input{aim.tex}
+\input{strategy.tex}
+\input{technology.tex}
+\input{protocol.tex}
+\input{so_far.tex}
+\input{conflicts.tex}
+\input{reference.tex}
+}
+\end{document}
