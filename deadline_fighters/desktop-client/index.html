@@ -1,74 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>AWS S3 File Upload</title>
+    <title>AWS S3 File System</title>
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.395.0.min.js"></script> 
-    <script src="index.js"></script>    
 </head>
 <body>
-    <input id="selectfile" type="file"/>
-	<button id="fileupload">Upload</button>
+   choose file:
+	<input id="file-chooser" type="file"/>
+	<br>
+	<button id="upload-button">Upload</button>
 	<p id="results"><p></p>
-    <br>
+	<br>
 	<button id="download-button">Download</button>
 	<br>
 	<button id="delete-button">Delete</button>
+	<br>
+	<button id="rename-button">Rename</button>
+	<br>
+	
+	
+	
 	
 	
     <script type="text/javascript">
+		/// <reference types="aws-sdk" />
 		/// Load the SDK for JavaScript
        // var AWS = require('aws-sdk');
         //login aws by using credentials to upload
-        AWS.config.update({
-            accessKeyId: 'xxx',//use individual accessKeyId
-			secretAccessKey: 'xxxx'//use individual secretAccessKey
-        });
-        //set region
-        AWS.config.region = 'us-east-2'; 
+		var credentials = {
+			accessKeyId: '***',//use individual accessKeyId
+			secretAccessKey: '****'//use individual secretAccessKey
+		};  
+		//set region
+		AWS.config.update(credentials);
+		AWS.config.region = 'eu-west-2';
+		
+		
+		
 		// create bucket instance
-        
-     /* $("#downloadButton").click(function(){
-        var s3 = new AWS.S3();
-        s3.getObject(
-            { Bucket: "deadlinefighters", Key: "card.jpg" },
-        function (error, data) {
-        if (error != null) {
-        alert("Failed to retrieve an object: " + error);
-         } else {
-        alert("Loaded " + data.ContentLength + " bytes");
-        // do something with data.Body
-    }
-  }
-);       }*/
-        
-      
-       var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});  //select which bucket to upload
-		var selectFile = document.getElementById('selectfile');
-		var upload = document.getElementById('fileupload');
+		var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});//select which bucket to upload
+		var fileChooser = document.getElementById('file-chooser');
+		var upload = document.getElementById('upload-button');
 		var download = document.getElementById('download-button');
 		var del = document.getElementById('delete-button');
+		var rename = document.getElementById('rename-button');
 		var results = document.getElementById('results');
-        upload.addEventListener('click', function () {
-			var file = selectFile.files[0];
+		upload.addEventListener('click', function () {
+			var file = fileChooser.files[0];
 			if (file) {
 				results.innerHTML = '';
-				var path = {Key: file.name, ContentType: file.type, Body: file, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'}; //set the related path of bucket, set body as file, ACL as public
-				bucket.upload(path, function (err, data) {
-					console.log(err);  //print error if failed
-					results.innerHTML = err ? 'ERROR!' : 'The file is uploaded.';
+				var params = {Key: file.name, ContentType: file.type, Body: file, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};//set the related path of bucket, set body as file, ACL as public
+				bucket.upload(params, function (err, data) {
+					console.log(err); //print error if failed
+					results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
 				});
 			} else {
-				results.innerHTML = 'Please select a file.';
+				results.innerHTML = 'Nothing to upload.';
 			}
 		}, false);
-
+		
 		
 		
 //download		
 var fs = require('fs');		
-var FilePath1 = '/test.docx';
+var FilePath1 = '/Test1！.zip';
 var bucket1 = 'deadlinefighters';
-var key1 = 'test.docx';
+var key1 = 'Test1！.zip';
 var down_load = new AWS.S3();
 		
 //		var s3 = new AWS.S3({params1: {Bucket: 'deadlinefighters', Key: 'aws.png'}});
@@ -96,46 +93,79 @@ var down_load = new AWS.S3();
 downloadFile(FilePath1, bucket1, key1);		
 		});
 		
-
 		
 		
-//delete - only can delete local file now!!!
-var FilePath2 = '/123.txt';
+//delete
 var bucket2 = 'deadlinefighters';
-var key2 = '123.txt';
+var key2 = '！.txt';
 var dele_te = new AWS.S3();
 del.addEventListener('click', function(){
 	
-//	fs.unlink(FilePath2,function (err) {
-//    if(err){
-//        return console.log(err);
-//    }else {
-//        console.log("delete sucessfully");
-//    }
-//})
-	
-	var deleteFile = (FilePath2, bucket2, key2) => {
 	var params2 = {
 		Bucket: bucket2,
 		Key: key2
 	};
-	dele_te.getObject(params2, (err, data) => {
-        	fs.unlink(FilePath2,function (err) {
+dele_te.deleteObject(params2, function (err, data) {
     if(err){
         return console.log(err);
     }else {
         console.log("delete sucessfully");
     }
-})
-    })			
-}
-deleteFile(FilePath2, bucket2, key2);		
-});		
+				});		
+	
+});
 		
 		
-		
-		
+
+//rename - first copy second delete
+var re_name = new AWS.S3();
+rename.addEventListener('click', function(){
+	
+		var params3 = {
+		Bucket: 'deadlinefighters',
+		Key: 'Test1！.zip',
         
+	};
+	
+	var params4 = {
+		Bucket: 'deadlinefighters',
+		CopySource: '/deadlinefighters/Test1！.zip',
+		Key: '2！.zip',
+        
+	};
+re_name.copyObject(params4, function (err, data) {
+   if (err) console.log(err, err.stack);
+   else    { 
+	        console.log(data); 
+	   
+re_name.deleteObject(params3, function (err, data) {
+    if(err){
+        return console.log(err);
+    }else {
+        console.log("rename sucessfully");
+    }
+	
+				});		
+		   }
+				});	
+//re_name.deleteObject(params3, function (err, data) {
+//    if(err){
+//        return console.log(err);
+//    }else {
+//        console.log("rename sucessfully");
+//    }
+//				});		
+//	
+	
+});
+	
+		
+		
+		
+		
     </script>
+	
+	
+	
 </body>
 </html>
