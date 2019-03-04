@@ -3,7 +3,7 @@
   "CredentialsProvider": {
     "CognitoIdentity": {
       "Default": {
-        "PoolId": "PoolId",
+        "PoolId": "Pool Id",
         "Region": "us-east-1"
       }
     }
@@ -13,7 +13,7 @@
   },
   "S3TransferUtility": {
     "Default": {
-      "Bucket": "BucketName",
+      "Bucket": "Bucket name",
       "Region": "eu-west-2"
     }
   }
