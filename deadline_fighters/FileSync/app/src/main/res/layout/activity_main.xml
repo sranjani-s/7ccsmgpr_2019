@@ -27,13 +27,14 @@
             android:layout_weight="2"
             android:hint="File Name" />
 
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="3">
 
         <Button
             android:id="@+id/btn_upload"
@@ -48,6 +49,13 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Download" />
+
+        <Button
+            android:id="@+id/btn_list_files"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="List Files" />
 
     </LinearLayout>
 
@@ -65,12 +73,54 @@
         android:orientation="vertical"
         android:weightSum="5">
 
-        <ImageView
-            android:id="@+id/img_file"
+        <!--<ImageView-->
+            <!--android:id="@+id/img_file"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="0dp"-->
+            <!--android:layout_weight="4.7" />-->
+
+        <ScrollView
+            android:id="@+id/sv_item_list"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="4.7" />
+            android:layout_height="wrap_content"
+            android:scrollbars="vertical"
+            android:fadingEdge="vertical"
+            android:background="#EDEDED"
+            android:layout_weight="4.7">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:scrollbars="vertical">
+
+                <ListView
+                    android:id="@+id/lv_item_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:dividerHeight="1px"
+                    android:divider="#B8B8B8" >
+                </ListView>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/tv_file_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="5dp"
+            android:layout_weight="0.3"
+            android:text=" "
+            />
 
     </LinearLayout>
+
+
+
+
+
 
 </LinearLayout>
