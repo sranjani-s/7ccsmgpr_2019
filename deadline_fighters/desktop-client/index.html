@@ -55,7 +55,7 @@
 				//login aws by using credentials to upload
 				var credentials = {
 						accessKeyId: 'xxxxx',//use individual accessKeyId
-						secretAccessKey: 'xxxxx'//use individual secretAccessKey
+						secretAccessKey: 'xxxx'//use individual secretAccessKey
 				};  
 
 				//set region
@@ -63,20 +63,12 @@
 				AWS.config.region = 'eu-west-2';
 
 				
-
+				//Server code -- begin
 				var xhr = new XMLHttpRequest();
 				var url = "http://10.40.216.211:80";
-				xhr.open("POST", url, true);
-				xhr.setRequestHeader("Content-Type", "application/json");
-				//xhr.onreadystatechange = function () {
-				//	if (xhr.readyState === 4 && xhr.status === 200) {
-				//		var json = JSON.parse(xhr.responseText);
-				//		console.log(json.email + ", " + json.password);
-				//	}
-				//};
-				var data = JSON.stringify({"email": "hey@mail.com", "password": "101010"});
-				xhr.send(data);
+				var data;
 				
+				//Server code -- end
 				
 				// create bucket instance
 				var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});//select which bucket to upload
@@ -93,12 +85,22 @@
 					var file = fileChooser.files[0];
 
 					if (file) {
+							xhr.open("POST", url, true);
+							xhr.setRequestHeader("Content-Type", "application/json");
 							results.innerHTML = '';
-							var params = {Key: file.name, ContentType: file.type, Body: file, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};//set the related path of bucket, set body as file, ACL as public
-							bucket.upload(params, function (err, data) {
-								console.log(err); //print error if failed
-								results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
-							});
+
+							data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file.name}});
+
+							xhr.onreadystatechange = function () {
+								if (xhr.readyState === 4 && xhr.status === 200) {
+									console.log("Status code of uploadFile: " + xhr.status);
+									results.innerHTML = 'UPLOADED';
+								}
+								else if(xhr.status!=200) {
+									results.innerHTML = 'ERROR!';
+								}
+							};
+							xhr.send(data);
 					} 
 					else {
 							results.innerHTML = 'Nothing to upload.';
@@ -109,14 +111,32 @@
 			
 				//create folder
 
-				var fs = require('fs');		
-				fs.mkdir("D:\\deadlinefighters\\",function(err){
+				var fs = require('fs');
+				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
+				if(isMacLike){
+					const dir = require('os').homedir()+"/deadlinefighters";
+					if(!fs.existsSync(dir)){
+						fs.mkdir(dir,function(err){
 
-				   if (err) {
-					   return console.error(err);
-				   }
-				   console.log("folder created successfully.");
-				});
+						   if (err) {
+							   return console.error(err);
+						   }
+						   console.log("folder created successfully.");
+						});
+					}
+				}
+				else{
+					var dir = "D:\\deadlinefighters\\";
+					if(!fs.existsSync(dir)){		
+						fs.mkdir(dir,function(err){
+
+						   if (err) {
+							   return console.error(err);
+						   }
+						   console.log("folder created successfully.");
+						});
+					}
+				}
 						
 				
 				
