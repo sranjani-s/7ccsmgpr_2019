@@ -206,6 +206,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * Updates the ListView height based on its children
      *
      * @param listView the ListView to adjust
+	 * This is only for interface and I want to focus on the functionality.
      */
 
     public static void setListViewHeightBasedOnChildren(ListView listView) {
@@ -217,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         int totalHeight = 0;
         int desiredWidth = View.MeasureSpec.makeMeasureSpec(listView.getWidth(), View.MeasureSpec.AT_MOST);
-        for (int i = 0; i < listAdapter.getCount(); i++) {
+        for (int i = 0; i < listAdapter.getCount(); ++i) {
             View listItem = listAdapter.getView(i, null, listView);
             listItem.measure(desiredWidth, View.MeasureSpec.UNSPECIFIED);
             totalHeight += listItem.getMeasuredHeight();
