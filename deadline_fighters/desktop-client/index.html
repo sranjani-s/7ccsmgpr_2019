@@ -158,72 +158,29 @@
 				
 			  
 			  
-					//sync
+					//sync: pull before push
 					$(sync).click(function(){
 
-						var fs = require("fs"); 
-						var bucket2 = 'deadlinefighters';
+						console.log("Entered syncbtn");
 
-						fs.readdir('D:\\deadlinefighters\\',function(err,files){
-							console.log(files);
-							var s3_upload = new AWS.S3();
-							 
-                        $.each(files, function(i, filecontent) {     
-	                        fs.readFile('D:\\deadlinefighters\\'+filecontent, function (err, data) {
-                                if (err) {
-                                    return console.error(err);
-                                }
-						    results.innerHTML = '';
-				            var params_upload = {Bucket: bucket2, Key: filecontent, Body: data, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};
-				            s3_upload.upload(params_upload, function (err, data) {
-					        console.log(err); 
-					        results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
-				                    });
-                                });		
-                            }); 
-						});
-				  
-						  
-				  
-		  				bucket.listObjects({}, function(err, data) {
+						xhr.open("POST", url, true);
 
-							if (err){ 
-								console.log(err, err.stack); // an error occurred 
-							} 
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
 
-							var objects = data.Contents;	  
-							$.each(objects, function(i, content) {
+						data = JSON.stringify({"operation": "syncAll", "bucketName": "deadlinefighters", "fileDetails": {"fileName": "All"}});
 
-								var fs = require('fs');	
-								var file = content.Key;
+						xhr.onreadystatechange = function () {
 
-								console.log(file);  
-
-								var filePath = '/deadlinefighters'+'/' + file;
-
-								console.log(filePath); 
-
-								var bucket1 = 'deadlinefighters';
-								var aws_download = new AWS.S3();
-								   
-								var params1 = {
-									Bucket: bucket1,
-									Key: file
-								};
-
-								aws_download.getObject(params1, function(err, data) {
-
-									if (err) {
-										console.error(err);
-									}
-									else{
-										fs.writeFileSync(filePath, data.Body);
-										console.log("download sucessfully");
-									}
-								});
-							});
-			
-						}); 
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("SyncAll successful with status code: " + xhr.status);
+								results.innerHTML = 'SYNCED!';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data); 
 		 			});
 			  
 				

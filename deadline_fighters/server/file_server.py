@@ -7,51 +7,89 @@ import boto3 #AWS S3 API in Python
 import simplejson #Interpret incoming JSON
 import json #Interpret incoming JSON
 import os #Get current directory
+import sys #Check platform
+import botocore
 
 from shutil import copyfile
+from os.path import expanduser,isfile,join
+from os import listdir
 
-from os.path import expanduser
-homeDir = expanduser("~")
+if sys.platform == 'darwin':
+    homeDir = expanduser("~")
+else:
+    homeDir = "D:/"
 
 s3_resource = boto3.resource('s3');
 bucketName = "deadlinefighters";
 syncDir = homeDir+"/deadlinefighters/";
 
-def download_All():
-        print("Reached download_All!")
-        #Insert S3 code here
+###### Utility functions ######
 
-def upload_file(fileDetails):
-        print("Entered upload_file")
-        fileName = fileDetails["fileName"]
+def is_json(myjson):
+    try:
+        json_object = json.loads(str(myjson))
+    except ValueError as e:
+        return False
+    return True
+
+###### AWS Operations ######
+
+def upload_file(fileName):
         copyfile(syncDir+fileName,os.getcwd()+"/"+fileName)
         s3_resource.Object(bucketName, fileName).upload_file(
     Filename=fileName)
         os.remove(os.getcwd()+"/"+fileName)
+        print("Uploaded file "+fileName)
         return
 
-def download_file(fileDetails):
-        print("Entered download_file")
-        fileName = fileDetails["fileName"]
+def download_file(fileName):
         try:
             s3_resource.Bucket(bucketName).download_file(fileName,syncDir+fileName)
+            print("Downloaded file "+fileName)
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "404":
                 print("The object does not exist.")
             else:
                 raise
+        return
 
-def delete_file(fileDetails):
-        print("Entered delete_file")
-        fileName = fileDetails["fileName"]
+def delete_file(fileName):
+        print(bucketName)
+        print(fileName)
         s3_resource.Object(bucketName, fileName).delete()
+        print("Deleted file "+fileName)
+        return
+
+
+def download_All():
+        bucket = s3_resource.Bucket(bucketName)
+        for s3_object in bucket.objects.all():
+            path, filename = os.path.split(s3_object.key)
+            download_file(filename)
+        print("All files downloaded from bucket "+bucketName)
+        return
+
+def upload_All():
+        for f in listdir(syncDir):
+            if isfile(join(syncDir,f)):
+                upload_file(f)
+        print("All files uploaded from "+homeDir)
+        return
+
+#Sync: Pull before Push
+def sync_All(fileName):
+        download_All()
+        upload_All()
+        print("SyncAll complete!")
 
 
 switcher = {
     "downloadAll": download_All,
     "uploadFile": upload_file,
     "downloadFile": download_file,
-    "deleteFile": delete_file
+    "deleteFile": delete_file,
+    "uploadAll": upload_All,
+    "syncAll": sync_All
 }
 
 class S(BaseHTTPRequestHandler):
@@ -82,12 +120,19 @@ class S(BaseHTTPRequestHandler):
 
         func = switcher.get(data["operation"], "Invalid operation")
 
-        return  func(data["fileDetails"])
+        fileDetails = data["fileDetails"]
+
+        if type(fileDetails) is dict:
+            fileName = fileDetails["fileName"]
+        else:
+            fileName = fileDetails
+
+        return  func(fileName)
 
 def run(server_class=HTTPServer, handler_class=S, port=80):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
-    print 'Starting httpd...'
+    print 'Starting deadlinefighters server...'
     httpd.serve_forever()
 
 if __name__ == "__main__":
