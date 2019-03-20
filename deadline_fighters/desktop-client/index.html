@@ -233,7 +233,7 @@
 					//Select a special file to download and delete
 			  		$('#objectList').on("click",'button',function(){
 						var i = $(this).attr('id');
-						var downloadbtn = $("<button id='download'></button><br>").text("download");
+						var downloadbtn = $("<button id='download'></button>").text("download");
 						var deletebtn = $("<button id='delete'></button>").text("delete");
 						$(downloadbtn).dialog();
 						$(deletebtn).dialog();
@@ -249,7 +249,6 @@
 						console.log(filePath); 
 
 						var bucket1 = 'deadlinefighters';
-						var aws_download = new AWS.S3();
 						var aws_delete = new AWS.S3();
 
 
@@ -266,8 +265,6 @@
 
 								xhr.onreadystatechange = function () {
 
-									console.log("State Change in download")
-
 									if (xhr.readyState === 4 && xhr.status === 200) {
 										console.log("Download successful with status code: " + xhr.status);
 										results.innerHTML = 'DOWNLOADED!';
@@ -281,18 +278,27 @@
 
 				  
 						$(deletebtn).click(function(){
-							var params2 = {
-									Bucket: bucket1,
-									Key: file
-							};
-							aws_delete.deleteObject(params2, function (err, data) {
-								if(err){
-									return console.log(err);
-								}
-								else {
-									console.log("delete sucessfully");
-								}
-							});	 
+
+								console.log("Entered deletebtn");
+
+								xhr.open("POST", url, true);
+
+								xhr.setRequestHeader("Content-Type", "application/json");
+								results.innerHTML = '';
+
+								data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
+
+								xhr.onreadystatechange = function () {
+
+									if (xhr.readyState === 4 && xhr.status === 200) {
+										console.log("Delete successful with status code: " + xhr.status);
+										results.innerHTML = 'DELETED!';
+									}
+									else if(xhr.status!=200) {
+										results.innerHTML = 'ERROR!';
+									}
+								};
+								xhr.send(data);
 				  		});
 					});
 				});

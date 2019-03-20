@@ -20,7 +20,7 @@ syncDir = homeDir+"/deadlinefighters/";
 def download_All():
         print("Reached download_All!")
         #Insert S3 code here
-        
+
 def upload_file(fileDetails):
         print("Entered upload_file")
         fileName = fileDetails["fileName"]
@@ -41,11 +41,17 @@ def download_file(fileDetails):
             else:
                 raise
 
+def delete_file(fileDetails):
+        print("Entered delete_file")
+        fileName = fileDetails["fileName"]
+        s3_resource.Object(bucketName, fileName).delete()
+
 
 switcher = {
     "downloadAll": download_All,
     "uploadFile": upload_file,
-    "downloadFile": download_file
+    "downloadFile": download_file,
+    "deleteFile": delete_file
 }
 
 class S(BaseHTTPRequestHandler):
