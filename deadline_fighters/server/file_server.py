@@ -15,22 +15,37 @@ homeDir = expanduser("~")
 
 s3_resource = boto3.resource('s3');
 bucketName = "deadlinefighters";
+syncDir = homeDir+"/deadlinefighters/";
 
 def download_All():
         print("Reached download_All!")
         #Insert S3 code here
+        
 def upload_file(fileDetails):
+        print("Entered upload_file")
         fileName = fileDetails["fileName"]
-        copyfile(homeDir+"/deadlinefighters/"+fileName,os.getcwd()+"/"+fileName)
+        copyfile(syncDir+fileName,os.getcwd()+"/"+fileName)
         s3_resource.Object(bucketName, fileName).upload_file(
     Filename=fileName)
         os.remove(os.getcwd()+"/"+fileName)
         return
 
+def download_file(fileDetails):
+        print("Entered download_file")
+        fileName = fileDetails["fileName"]
+        try:
+            s3_resource.Bucket(bucketName).download_file(fileName,syncDir+fileName)
+        except botocore.exceptions.ClientError as e:
+            if e.response['Error']['Code'] == "404":
+                print("The object does not exist.")
+            else:
+                raise
+
 
 switcher = {
     "downloadAll": download_All,
-    "uploadFile": upload_file
+    "uploadFile": upload_file,
+    "downloadFile": download_file
 }
 
 class S(BaseHTTPRequestHandler):

@@ -54,7 +54,7 @@
 				// var AWS = require('aws-sdk');
 				//login aws by using credentials to upload
 				var credentials = {
-						accessKeyId: 'xxxxx',//use individual accessKeyId
+						accessKeyId: 'xxxx',//use individual accessKeyId
 						secretAccessKey: 'xxxx'//use individual secretAccessKey
 				};  
 
@@ -62,13 +62,10 @@
 				AWS.config.update(credentials);
 				AWS.config.region = 'eu-west-2';
 
-				
-				//Server code -- begin
 				var xhr = new XMLHttpRequest();
-				var url = "http://10.40.216.211:80";
+				var url = "http://10.40.129.248:80";
 				var data;
 				
-				//Server code -- end
 				
 				// create bucket instance
 				var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});//select which bucket to upload
@@ -209,7 +206,6 @@
 
 								var bucket1 = 'deadlinefighters';
 								var aws_download = new AWS.S3();
-								var aws_delete = new AWS.S3();
 								   
 								var params1 = {
 									Bucket: bucket1,
@@ -237,7 +233,7 @@
 					//Select a special file to download and delete
 			  		$('#objectList').on("click",'button',function(){
 						var i = $(this).attr('id');
-						var downloadbtn = $("<button id='download'></button>").text("download");
+						var downloadbtn = $("<button id='download'></button><br>").text("download");
 						var deletebtn = $("<button id='delete'></button>").text("delete");
 						$(downloadbtn).dialog();
 						$(deletebtn).dialog();
@@ -258,20 +254,29 @@
 
 
 						$(downloadbtn).click(function(){
-							var params1 = {
-								Bucket: bucket1,
-								Key: file
-							};
-							aws_download.getObject(params1, function(err, data) {
-								if (err) {
-									console.error(err);
-								}
-								else {
-									fs.writeFileSync(filePath, data.Body)
-									//data.body.toString()
-									console.log("download sucessfully");
-								}
-							});
+
+								console.log("Entered downloadbtn");
+
+								xhr.open("POST", url, true);
+
+								xhr.setRequestHeader("Content-Type", "application/json");
+								results.innerHTML = '';
+
+								data = JSON.stringify({"operation": "downloadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
+
+								xhr.onreadystatechange = function () {
+
+									console.log("State Change in download")
+
+									if (xhr.readyState === 4 && xhr.status === 200) {
+										console.log("Download successful with status code: " + xhr.status);
+										results.innerHTML = 'DOWNLOADED!';
+									}
+									else if(xhr.status!=200) {
+										results.innerHTML = 'ERROR!';
+									}
+								};
+								xhr.send(data);
 				  		});
 
 				  
@@ -290,55 +295,6 @@
 							});	 
 				  		});
 					});
-				});
-				
-
-				//download		
-				var fs = require('fs');		
-				var FilePath1 = '/Test1！.zip';
-				var bucket1 = 'deadlinefighters';
-				var key1 = 'Test1！.zip';
-				var download1 = new AWS.S3();
-
-				download.addEventListener('click', function(){
-
-					var downloadFile = (FilePath1, bucket1, key1) => {
-						var params1 = {
-							Bucket: bucket1,
-							Key: key1
-						};
-
-						download1.getObject(params1, (err, data) => {
-							if (err) console.error(err)
-							fs.writeFileSync(FilePath1, data.Body.toString())
-						})
-					}
-
-					downloadFile(FilePath1, bucket1, key1);		
-				});
-		
-		
-		
-				//delete
-				var bucket2 = 'deadlinefighters';
-				var key2 = '！.txt';
-				var delete1 = new AWS.S3();
-
-				del.addEventListener('click', function(){
-	
-					var params2 = {
-						Bucket: bucket2,
-						Key: key2
-					};
-
-					delete1.deleteObject(params2, function (err, data) {
-						if(err){
-							return console.log(err);
-						}
-						else {
-							console.log("delete sucessfully");
-						}
-					});			
 				});
 		
 		
