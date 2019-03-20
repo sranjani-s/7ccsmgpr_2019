@@ -54,31 +54,17 @@
 				// var AWS = require('aws-sdk');
 				//login aws by using credentials to upload
 				var credentials = {
-						accessKeyId: 'xxxxx',//use individual accessKeyId
-						secretAccessKey: 'xxxxx'//use individual secretAccessKey
+						accessKeyId: 'xxxx',//use individual accessKeyId
+						secretAccessKey: 'xxxx'//use individual secretAccessKey
 				};  
 
 				//set region
 				AWS.config.update(credentials);
 				AWS.config.region = 'eu-west-2';
 
-				/* Code for connection to server
-
 				var xhr = new XMLHttpRequest();
-				var url = "http://10.40.216.211:80";
-				xhr.open("POST", url, true);
-				xhr.setRequestHeader("Content-Type", "application/json");
-				/*xhr.onreadystatechange = function () {
-					if (xhr.readyState === 4 && xhr.status === 200) {
-						var json = JSON.parse(xhr.responseText);
-						console.log(json.email + ", " + json.password);
-					}
-				};
-				var data = JSON.stringify({"email": "hey@mail.com", "password": "101010"});
-				xhr.send(data);
-
-				*/
-				
+				var url = "http://10.40.129.248:80";
+				var data;
 				
 				
 				// create bucket instance
@@ -96,12 +82,22 @@
 					var file = fileChooser.files[0];
 
 					if (file) {
+							xhr.open("POST", url, true);
+							xhr.setRequestHeader("Content-Type", "application/json");
 							results.innerHTML = '';
-							var params = {Key: file.name, ContentType: file.type, Body: file, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};//set the related path of bucket, set body as file, ACL as public
-							bucket.upload(params, function (err, data) {
-								console.log(err); //print error if failed
-								results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
-							});
+
+							data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file.name}});
+
+							xhr.onreadystatechange = function () {
+								if (xhr.readyState === 4 && xhr.status === 200) {
+									console.log("Status code of uploadFile: " + xhr.status);
+									results.innerHTML = 'UPLOADED';
+								}
+								else if(xhr.status!=200) {
+									results.innerHTML = 'ERROR!';
+								}
+							};
+							xhr.send(data);
 					} 
 					else {
 							results.innerHTML = 'Nothing to upload.';
@@ -112,14 +108,32 @@
 			
 				//create folder
 
-				var fs = require('fs');		
-				fs.mkdir("D:\\deadlinefighters\\",function(err){
+				var fs = require('fs');
+				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
+				if(isMacLike){
+					const dir = require('os').homedir()+"/deadlinefighters";
+					if(!fs.existsSync(dir)){
+						fs.mkdir(dir,function(err){
 
-				   if (err) {
-					   return console.error(err);
-				   }
-				   console.log("folder created successfully.");
-				});
+						   if (err) {
+							   return console.error(err);
+						   }
+						   console.log("folder created successfully.");
+						});
+					}
+				}
+				else{
+					var dir = "D:\\deadlinefighters\\";
+					if(!fs.existsSync(dir)){		
+						fs.mkdir(dir,function(err){
+
+						   if (err) {
+							   return console.error(err);
+						   }
+						   console.log("folder created successfully.");
+						});
+					}
+				}
 						
 				
 				
@@ -192,7 +206,6 @@
 
 								var bucket1 = 'deadlinefighters';
 								var aws_download = new AWS.S3();
-								var aws_delete = new AWS.S3();
 								   
 								var params1 = {
 									Bucket: bucket1,
@@ -236,92 +249,58 @@
 						console.log(filePath); 
 
 						var bucket1 = 'deadlinefighters';
-						var aws_download = new AWS.S3();
 						var aws_delete = new AWS.S3();
 
 
 						$(downloadbtn).click(function(){
-							var params1 = {
-								Bucket: bucket1,
-								Key: file
-							};
-							aws_download.getObject(params1, function(err, data) {
-								if (err) {
-									console.error(err);
-								}
-								else {
-									fs.writeFileSync(filePath, data.Body)
-									//data.body.toString()
-									console.log("download sucessfully");
-								}
-							});
+
+								console.log("Entered downloadbtn");
+
+								xhr.open("POST", url, true);
+
+								xhr.setRequestHeader("Content-Type", "application/json");
+								results.innerHTML = '';
+
+								data = JSON.stringify({"operation": "downloadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
+
+								xhr.onreadystatechange = function () {
+
+									if (xhr.readyState === 4 && xhr.status === 200) {
+										console.log("Download successful with status code: " + xhr.status);
+										results.innerHTML = 'DOWNLOADED!';
+									}
+									else if(xhr.status!=200) {
+										results.innerHTML = 'ERROR!';
+									}
+								};
+								xhr.send(data);
 				  		});
 
 				  
 						$(deletebtn).click(function(){
-							var params2 = {
-									Bucket: bucket1,
-									Key: file
-							};
-							aws_delete.deleteObject(params2, function (err, data) {
-								if(err){
-									return console.log(err);
-								}
-								else {
-									console.log("delete sucessfully");
-								}
-							});	 
+
+								console.log("Entered deletebtn");
+
+								xhr.open("POST", url, true);
+
+								xhr.setRequestHeader("Content-Type", "application/json");
+								results.innerHTML = '';
+
+								data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
+
+								xhr.onreadystatechange = function () {
+
+									if (xhr.readyState === 4 && xhr.status === 200) {
+										console.log("Delete successful with status code: " + xhr.status);
+										results.innerHTML = 'DELETED!';
+									}
+									else if(xhr.status!=200) {
+										results.innerHTML = 'ERROR!';
+									}
+								};
+								xhr.send(data);
 				  		});
 					});
-				});
-				
-
-				//download		
-				var fs = require('fs');		
-				var FilePath1 = '/Test1！.zip';
-				var bucket1 = 'deadlinefighters';
-				var key1 = 'Test1！.zip';
-				var download1 = new AWS.S3();
-
-				download.addEventListener('click', function(){
-
-					var downloadFile = (FilePath1, bucket1, key1) => {
-						var params1 = {
-							Bucket: bucket1,
-							Key: key1
-						};
-
-						download1.getObject(params1, (err, data) => {
-							if (err) console.error(err)
-							fs.writeFileSync(FilePath1, data.Body.toString())
-						})
-					}
-
-					downloadFile(FilePath1, bucket1, key1);		
-				});
-		
-		
-		
-				//delete
-				var bucket2 = 'deadlinefighters';
-				var key2 = '！.txt';
-				var delete1 = new AWS.S3();
-
-				del.addEventListener('click', function(){
-	
-					var params2 = {
-						Bucket: bucket2,
-						Key: key2
-					};
-
-					delete1.deleteObject(params2, function (err, data) {
-						if(err){
-							return console.log(err);
-						}
-						else {
-							console.log("delete sucessfully");
-						}
-					});			
 				});
 		
 		
