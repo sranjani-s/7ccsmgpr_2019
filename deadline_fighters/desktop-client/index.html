@@ -78,33 +78,6 @@
 				var edit = document.getElementById('edit-button');
 				var sync = document.getElementById('sync-button');
 				var results = document.getElementById('results');
-				upload.addEventListener('click', function () {
-
-					var file = fileChooser.files[0];
-
-					if (file) {
-							xhr.open("POST", url, true);
-							xhr.setRequestHeader("Content-Type", "application/json");
-							results.innerHTML = '';
-
-							data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file.name}});
-
-							xhr.onreadystatechange = function () {
-								if (xhr.readyState === 4 && xhr.status === 200) {
-									console.log("Status code of uploadFile: " + xhr.status);
-									results.innerHTML = 'UPLOADED';
-								}
-								else if(xhr.status!=200) {
-									results.innerHTML = 'ERROR!';
-								}
-							};
-							xhr.send(data);
-					} 
-					else {
-							results.innerHTML = 'Nothing to upload.';
-					}
-
-				}, false);
 				
 			
 				//create folder
@@ -135,10 +108,39 @@
 						});
 					}
 				}
+
+				//Upload function
+				upload.addEventListener('click', function () {
+
+					var file = fileChooser.files[0];
+
+					if (file) {
+							xhr.open("POST", url, true);
+							xhr.setRequestHeader("Content-Type", "application/json");
+							results.innerHTML = '';
+
+							data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file.name}});
+
+							xhr.onreadystatechange = function () {
+								if (xhr.readyState === 4 && xhr.status === 200) {
+									console.log("Status code of uploadFile: " + xhr.status);
+									results.innerHTML = 'UPLOADED';
+								}
+								else if(xhr.status!=200) {
+									results.innerHTML = 'ERROR!';
+								}
+							};
+							xhr.send(data);
+					} 
+					else {
+							results.innerHTML = 'Nothing to upload.';
+					}
+
+				}, false);
 						
 				
 				
-				//list
+				//list all files on the server
 				bucket.listObjects({}, function(err, data) {
 
 					if (err) 
@@ -186,7 +188,7 @@
 				
 			  
 			  
-					//Select a special file to download and delete
+					//Select a file to download or delete
 			  		$('#objectList').on("click",'button',function(){
 						var i = $(this).attr('id');
 						var downloadbtn = $("<button id='download'></button>").text("download");
