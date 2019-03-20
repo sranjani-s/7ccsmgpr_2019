@@ -65,6 +65,7 @@
 				var xhr = new XMLHttpRequest();
 				var url = "http://10.40.129.248:80";
 				var data;
+				var dir; //Local directory synced
 				
 				
 				// create bucket instance
@@ -111,7 +112,7 @@
 				var fs = require('fs');
 				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
 				if(isMacLike){
-					const dir = require('os').homedir()+"/deadlinefighters";
+					dir = require('os').homedir()+"/deadlinefighters";
 					if(!fs.existsSync(dir)){
 						fs.mkdir(dir,function(err){
 
@@ -123,7 +124,7 @@
 					}
 				}
 				else{
-					var dir = "D:\\deadlinefighters\\";
+					dir = "D:\\deadlinefighters\\";
 					if(!fs.existsSync(dir)){		
 						fs.mkdir(dir,function(err){
 
