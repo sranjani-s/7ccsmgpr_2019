@@ -157,7 +157,7 @@
 				
 			  
 			  
-					//sync——only can download all files now, the function of upload all files are not implemented.
+					//sync
 					$(sync).click(function(){
 
 						var fs = require("fs"); 
@@ -166,22 +166,20 @@
 						fs.readdir('D:\\deadlinefighters\\',function(err,files){
 							console.log(files);
 							var s3_upload = new AWS.S3();
-
-							for(var i=0;i<files.length; ++i){
-
-								if (file){
-										results.innerHTML = '';
-										var params_up = {Bucket: bucket2, Key: file.name, ContentType: file.type, Body: file, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};//set the related path of bucket, set body as file, ACL as public
-										s3_upload.upload(params_up, function (err, data) {
-											console.log(err); //print error if failed
-											results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
-										});
-
-								} 
-								else {
-									results.innerHTML = 'Nothing to upload.';
-								}
-							}
+							 
+                        $.each(files, function(i, filecontent) {     
+	                        fs.readFile('D:\\deadlinefighters\\'+filecontent, function (err, data) {
+                                if (err) {
+                                    return console.error(err);
+                                }
+						    results.innerHTML = '';
+				            var params_upload = {Bucket: bucket2, Key: filecontent, Body: data, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};
+				            s3_upload.upload(params_upload, function (err, data) {
+					        console.log(err); 
+					        results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
+				                    });
+                                });		
+                            }); 
 						});
 				  
 						  
