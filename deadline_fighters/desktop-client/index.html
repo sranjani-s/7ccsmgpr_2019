@@ -56,14 +56,12 @@
 						secretAccessKey: 'xxxx'//use individual secretAccessKey
 				};  
 
-				var ip = require("ip");
-
 				//set region
 				AWS.config.update(credentials);
 				AWS.config.region = 'eu-west-2';
 
 				var xhr = new XMLHttpRequest();
-				var url = "http://"+ip.address();
+				var url = "http://10.40.182.16:80"; //static IP for Siva's machine
 				var data,dir;
 				
 				
@@ -108,7 +106,7 @@
 					}
 				}
 
-				//Generic function for AWS Calls
+				//Generic function for AWS Calls: Not used right now. Code to be refactored to remove redundancy
 
 				function awsCall(operation,fileName){
 					xhr.open("POST", url, true);
