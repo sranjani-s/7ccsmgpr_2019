@@ -9,10 +9,14 @@ import json #Interpret incoming JSON
 import os #Get current directory
 import sys #Check platform
 import botocore
+import mysql.connector
+import sqlite3
 
 from shutil import copyfile
 from os.path import expanduser,isfile,join
 from os import listdir
+
+##### Initial Setup ######
 
 if sys.platform == 'darwin':
     homeDir = expanduser("~")
