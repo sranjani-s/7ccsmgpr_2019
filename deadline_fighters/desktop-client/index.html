@@ -56,14 +56,15 @@
 						secretAccessKey: 'xxxx'//use individual secretAccessKey
 				};  
 
+				var ip = require("ip");
+
 				//set region
 				AWS.config.update(credentials);
 				AWS.config.region = 'eu-west-2';
 
 				var xhr = new XMLHttpRequest();
-				var url = "http://10.40.129.248:80";
-				var data;
-				var dir; //Local directory synced
+				var url = "http://"+ip.address();
+				var data,dir;
 				
 				
 				// create bucket instance
