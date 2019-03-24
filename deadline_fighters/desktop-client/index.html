@@ -1,305 +1,414 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>AWS S3 File System</title>
-	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.395.0.min.js"></script> 
-	<script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
-	<script src="//apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-</head>
-<body>
-	<ul id="objectList" >     </ul>
-	<br>
-	<button id="sync-button">Sync</button>
-	<br>
-	<input id="file-chooser" type="file"/>
-	<br>
-	<button id="upload-button">Upload</button>
-	<p id="results"><p></p>
-	<br>
-	<button id="download-button">Download</button>
-	<br>
-	<button id="delete-button">Delete</button>
-	<br>
-	<button id="rename-button">Rename</button>
-	<br>
-	<input type="file" id="file" />
-	<div id="box"></div>
-	<button id="edit-button">Edit</button>
-	<br>
-	
-	
-	
-	
-	
-    <script type="text/javascript">
-		/// <reference types="aws-sdk" />
-		/// Load the SDK for JavaScript
-       // var AWS = require('aws-sdk');
-        //login aws by using credentials to upload
-	var credentials = {
-			accessKeyId: '***',//use individual accessKeyId
-			secretAccessKey: '****'//use individual secretAccessKey
-	};  
-	//set region
-	AWS.config.update(credentials);
-	AWS.config.region = 'eu-west-2';
+	<head>
+		<title>AWS S3 File System</title>
+		<script src="https://sdk.amazonaws.com/js/aws-sdk-2.395.0.min.js"></script> 
+		<script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
+		<script src="https://apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+	</head>
+	<body>
+
+		<ul id="objectList" ></ul>
+
+		<br>
+
+		<button id="sync-button">Sync</button>
+
+		<br>
+
+		<input id="file-chooser" type="file"/>
+
+		<br>
+
+		<button id="upload-button">Upload</button>
+
+		<p id="results">
+			<p></p>
+		
+			<br>
+
+			<button id="download-button">Download</button>
+
+			<br>
+			
+			<button id="delete-button">Delete</button>
+			
+			<br>
+			
+			<button id="rename-button">Rename</button>
+			
+			<br>
+			
+			<input type="file" id="file" />
+			
+			<div id="box"></div>
+			
+			<button id="edit-button">Edit</button>
+			
+			<br>
 		
 		
-		
-		// create bucket instance
-		var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});//select which bucket to upload
-		var fileChooser = document.getElementById('file-chooser');
-		var upload = document.getElementById('upload-button');
-		var download = document.getElementById('download-button');
-		var del = document.getElementById('delete-button');
-		var rename = document.getElementById('rename-button');
-		var edit = document.getElementById('edit-button');
-		var sync = document.getElementById('sync-button');
-		var results = document.getElementById('results');
-		upload.addEventListener('click', function () {
-		var file = fileChooser.files[0];
-		if (file) {
-				results.innerHTML = '';
-				var params = {Key: file.name, ContentType: file.type, Body: file, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};//set the related path of bucket, set body as file, ACL as public
-				bucket.upload(params, function (err, data) {
-					console.log(err); //print error if failed
-					results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
-				});
-		} else {
-				results.innerHTML = 'Nothing to upload.';
-			}
-		}, false);
-		
-	
-//create folder
-var fs = require('fs');		
-fs.mkdir("D:\\deadlinefighters\\",function(err){
-   if (err) {
-       return console.error(err);
-   }
-   console.log("folder created successfully.");
-});	
+			<script type="text/javascript">
+
+				//AWS credentials
+				var credentials = {
+						accessKeyId: 'xxxx',//use individual accessKeyId
+						secretAccessKey: 'xxxx'//use individual secretAccessKey
+				};  
+
+				//set region
+				AWS.config.update(credentials);
+				AWS.config.region = 'eu-west-2';
+
+				var xhr = new XMLHttpRequest();
+				var url = "http://10.40.182.16:80"; //static IP for Siva's machine
+				var data,dir;
 				
-		
-		
-//list
-bucket.listObjects({}, function(err, data) {
-    if (err) 
-    {
-        console.log(err, err.stack); 
-    }// an error occurred
-    $('#objectList').empty();   //empty the list
-    var objects = data.Contents;
-	  
-    $.each(objects, function(i, content) {
-       //successful response in console
-      console.log(data);  
-       //list the file name to the page
-	  $('#objectList').append("<button  id="+i+" value= '"+content.Key+"'>"+content.Key+"</button><br>");
-	
-}); 
-	    
-	  
-	  
-//sync——only can download all files now, the function of upload all files are not implemented.
-$(sync).click(function(){
-var fs = require("fs"); 
-var bucket2 = 'deadlinefighters';		  
-fs.readdir('D:\\deadlinefighters\\',function(err,files){
-	console.log(files);
-	var s3_upload = new AWS.S3();
-	for(var i=0;i<files.length; ++i){
-	if (file) {
-				results.innerHTML = '';
-				var params_up = {Bucket: bucket2, Key: file.name, ContentType: file.type, Body: file, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};//set the related path of bucket, set body as file, ACL as public
-				s3_upload.upload(params_up, function (err, data) {
-					console.log(err); //print error if failed
-					results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
+				
+				// create bucket instance
+				var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});//select which bucket to upload
+				var fileChooser = document.getElementById('file-chooser');
+				var upload = document.getElementById('upload-button');
+				var download = document.getElementById('download-button');
+				var del = document.getElementById('delete-button');
+				var rename = document.getElementById('rename-button');
+				var edit = document.getElementById('edit-button');
+				var sync = document.getElementById('sync-button');
+				var results = document.getElementById('results');
+				
+				function onLoadFunctions(){
+					//create folder
+
+					var fs = require('fs');
+					var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
+					if(isMacLike){
+						dir = require('os').homedir()+"/deadlinefighters";
+						if(!fs.existsSync(dir)){
+							fs.mkdir(dir,function(err){
+
+							   if (err) {
+								   return console.error(err);
+							   }
+							   console.log("folder created successfully.");
+							});
+						}
+					}
+					else{
+						dir = "D:\\deadlinefighters\\";
+						if(!fs.existsSync(dir)){		
+							fs.mkdir(dir,function(err){
+
+							   if (err) {
+								   return console.error(err);
+							   }
+							   console.log("folder created successfully.");
+							});
+						}
+					}
+
+					xhr.open("POST", url, true);
+
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						data = JSON.stringify({"operation": "syncAll", "bucketName": "deadlinefighters", "fileDetails": {"fileName": "All"}});
+
+						xhr.onreadystatechange = function () {
+
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("SyncAll successful with status code: " + xhr.status);
+								results.innerHTML = 'SYNCED!';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data); 
+				}
+
+				window.onload = onLoadFunctions;
+
+				//Generic function for AWS Calls: Not used right now. Code to be refactored to remove redundancy
+
+				function awsCall(operation,fileName){
+					xhr.open("POST", url, true);
+					xhr.setRequestHeader("Content-Type", "application/json");
+					results.innerHTML = '';
+
+					data = JSON.stringify({"operation": operation, "bucketName": "deadlinefighters", "fileDetails": {"fileName": fileName}});
+
+					xhr.onreadystatechange = function () {
+						if (xhr.readyState === 4 && xhr.status === 200) {
+							console.log("Status code of "+operation+" : " + xhr.status);
+							results.innerHTML = operation+' SUCCESS!';
+						}
+						else if(xhr.status!=200) {
+							results.innerHTML = 'ERROR!';
+						}
+					};
+					xhr.send(data);
+				}
+
+				
+				//File Watcher
+				var chokidar = require('chokidar')
+				var watcher = chokidar.watch(dir, {
+								  ignored: /[\/\\]\./,
+								  persistent: true
+							  });
+
+				watcher
+				  .on('add', function(dir) {
+						console.log('File', dir, 'has been added');
+						xhr.open("POST", url, true);
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": dir.replace(/^.*[\\\/]/, '')}});
+
+						xhr.onreadystatechange = function () {
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("Status code of uploadFile: " + xhr.status);
+								results.innerHTML = 'UPLOADED';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data);
+						
+				  })
+				  .on('addDir', function(dir) {
+						console.log('Directory', dir, 'has been added');
+				  })
+				  .on('change', function(dir) {
+					   console.log('File', dir, 'has been changed');
+				  })
+				  .on('unlink', function(dir) {
+						console.log('File', dir, 'has been removed');
+
+						xhr.open("POST", url, true);
+
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": dir.replace(/^.*[\\\/]/, '')}});
+
+						xhr.onreadystatechange = function () {
+
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("Delete successful with status code: " + xhr.status);
+								results.innerHTML = 'DELETED!';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data);
+
+				  })
+				  .on('unlinkDir', function(dir) {
+					   console.log('Directory', dir, 'has been removed');
+				  })
+				  .on('error', function(error) {
+					   console.log('Error happened', error);
+				  })
+				  .on('raw', function(event, dir, details) {
+					   // This event should be triggered everytime something happens.
+					   console.log('Raw event info:', event, dir, details);
+				  }); 
+			
+
+				//Upload function
+				upload.addEventListener('click', function () {
+
+					var file = fileChooser.files[0];
+
+					if (file) {
+							xhr.open("POST", url, true);
+							xhr.setRequestHeader("Content-Type", "application/json");
+							results.innerHTML = '';
+
+							data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file.name}});
+
+							xhr.onreadystatechange = function () {
+								if (xhr.readyState === 4 && xhr.status === 200) {
+									console.log("Status code of uploadFile: " + xhr.status);
+									results.innerHTML = 'UPLOADED';
+								}
+								else if(xhr.status!=200) {
+									results.innerHTML = 'ERROR!';
+								}
+							};
+							xhr.send(data);
+					} 
+					else {
+							results.innerHTML = 'Nothing to upload.';
+					}
+
+				}, false);
+						
+				
+				
+				//list all files on the server
+				bucket.listObjects({}, function(err, data) {
+
+					if (err) 
+					{
+						console.log(err, err.stack); 
+					}// an error occurred
+
+					$('#objectList').empty();   //empty the list
+					var objects = data.Contents;
+					  
+					$.each(objects, function(i, content) {
+						//successful response in console
+						console.log(data);  
+						//list the file name to the page
+						$('#objectList').append("<button  id="+i+" value= '"+content.Key+"'>"+content.Key+"</button><br>");
+					}); 
+				
+			  
+			  
+					//sync: pull before push
+					$(sync).click(function(){
+
+						console.log("Entered syncbtn");
+
+						xhr.open("POST", url, true);
+
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						data = JSON.stringify({"operation": "syncAll", "bucketName": "deadlinefighters", "fileDetails": {"fileName": "All"}});
+
+						xhr.onreadystatechange = function () {
+
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("SyncAll successful with status code: " + xhr.status);
+								results.innerHTML = 'SYNCED!';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data); 
+					});
+			  
+				
+			  
+			  
+					//Select a file to download or delete
+					$('#objectList').on("click",'button',function(){
+						var i = $(this).attr('id');
+						var downloadbtn = $("<button id='download'></button>").text("download");
+						var deletebtn = $("<button id='delete'></button>").text("delete");
+						$(downloadbtn).dialog();
+						$(deletebtn).dialog();
+
+
+						var fs = require('fs');	
+						var file = $(this).val();
+
+						console.log(file);  
+
+						var filePath = '/deadlinefighters'+'/' + file;
+
+						console.log(filePath); 
+
+						var bucket1 = 'deadlinefighters';
+						var aws_delete = new AWS.S3();
+
+
+						$(downloadbtn).click(function(){
+
+								console.log("Entered downloadbtn");
+
+								xhr.open("POST", url, true);
+
+								xhr.setRequestHeader("Content-Type", "application/json");
+								results.innerHTML = '';
+
+								data = JSON.stringify({"operation": "downloadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
+
+								xhr.onreadystatechange = function () {
+
+									if (xhr.readyState === 4 && xhr.status === 200) {
+										console.log("Download successful with status code: " + xhr.status);
+										results.innerHTML = 'DOWNLOADED!';
+									}
+									else if(xhr.status!=200) {
+										results.innerHTML = 'ERROR!';
+									}
+								};
+								xhr.send(data);
+						});
+
+				  
+						$(deletebtn).click(function(){
+
+								console.log("Entered deletebtn");
+
+								xhr.open("POST", url, true);
+
+								xhr.setRequestHeader("Content-Type", "application/json");
+								results.innerHTML = '';
+
+								data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
+
+								xhr.onreadystatechange = function () {
+
+									if (xhr.readyState === 4 && xhr.status === 200) {
+										console.log("Delete successful with status code: " + xhr.status);
+										results.innerHTML = 'DELETED!';
+									}
+									else if(xhr.status!=200) {
+										results.innerHTML = 'ERROR!';
+									}
+								};
+								xhr.send(data);
+						});
+					});
 				});
-			} else {
-				results.innerHTML = 'Nothing to upload.';
-			}
-     }
-});
-		  
-		  		  
-		  
-  bucket.listObjects({}, function(err, data) {
-    if (err) console.log(err, err.stack); // an error occurred  
-    var objects = data.Contents;	  
-    $.each(objects, function(i, content) {
-	  	  var fs = require('fs');	
-		  var file = content.Key;
-		  console.log(file);  
-		  var filePath = '/deadlinefighters'+'/' + file;
-		  console.log(filePath); 
-		  var bucket1 = 'deadlinefighters';
-		  var aws_download = new AWS.S3();
-		  var aws_delete = new AWS.S3();
-		  
-		  
-          var params1 = {
-        Bucket: bucket1,
-        Key: file
-        };
-		aws_download.getObject(params1, function(err, data) {
-        if (err) {
-			console.error(err);
-		}
-		else{
-        fs.writeFileSync(filePath, data.Body)
-		console.log("download sucessfully");
-		}
-    });
-		  });
-	
-    }); 
- });
-	  
-	    
-	  
-	  
-//Select a special file to download and delete
-	  $('#objectList').on("click",'button',function(){
-		  var i = $(this).attr('id');
-		  var downloadbtn = $("<button id='download'></button>").text("download");
-		  var deletebtn = $("<button id='delete'></button>").text("delete");
-		  $(downloadbtn).dialog();
-		  $(deletebtn).dialog();
- 
-		  
-		  var fs = require('fs');	
-		  var file = $(this).val();
-		  console.log(file);  
-		  var filePath = '/deadlinefighters'+'/' + file;
-		  console.log(filePath); 
-		  var bucket1 = 'deadlinefighters';
-		  var aws_download = new AWS.S3();
-		  var aws_delete = new AWS.S3();
-		  
-		  
-		  $(downloadbtn).click(function(){
-          var params1 = {
-        Bucket: bucket1,
-        Key: file
-        };
-		aws_download.getObject(params1, function(err, data) {
-        if (err) {
-			console.error(err);
-		}
-		else{
-        fs.writeFileSync(filePath, data.Body)
-			//data.body.toString()
-		console.log("download sucessfully");
-		}
-    });
-		  });
-		  
-		  
-		  
-$(deletebtn).click(function(){
-var params2 = {
-		Bucket: bucket1,
-		Key: file
-	};
-aws_delete.deleteObject(params2, function (err, data) {
-    if(err){
-        return console.log(err);
-    }else {
-        console.log("delete sucessfully");
-    }
-				});	 
-		  });
-		
-		
-		
-		
-		
-//download		
-var fs = require('fs');		
-var FilePath1 = '/Test1！.zip';
-var bucket1 = 'deadlinefighters';
-var key1 = 'Test1！.zip';
-var download1 = new AWS.S3();
-download.addEventListener('click', function(){		
-	var downloadFile = (FilePath1, bucket1, key1) => {
-    var params1 = {
-        Bucket: bucket1,
-        Key: key1
-    };
-		download1.getObject(params1, (err, data) => {
-        if (err) console.error(err)
-        fs.writeFileSync(FilePath1, data.Body.toString())
-    })
-}
-downloadFile(FilePath1, bucket1, key1);		
-		});
-		
-		
-		
-//delete
-var bucket2 = 'deadlinefighters';
-var key2 = '！.txt';
-var delete1 = new AWS.S3();
-del.addEventListener('click', function(){
-	
-	var params2 = {
-		Bucket: bucket2,
-		Key: key2
-	};
-delete1.deleteObject(params2, function (err, data) {
-    if(err){
-        return console.log(err);
-    }else {
-        console.log("delete sucessfully");
-    }
-				});		
-	
-});
 		
 		
 
-//rename - first copy second delete
-var re_name = new AWS.S3();
-rename.addEventListener('click', function(){
-	
-		var params3 = {
-		Bucket: 'deadlinefighters',
-		Key: 'Test1！.zip',
-        
-	};
-	
-	var params4 = {
-		Bucket: 'deadlinefighters',
-		CopySource: '/deadlinefighters/Test1！.zip',
-		Key: '2！.zip',
-        
-	};
-re_name.copyObject(params4, function (err, data) {
-   if (err) console.log(err, err.stack);
-   else    { 
-	        console.log(data); 
-	   
-re_name.deleteObject(params3, function (err, data) {
-    if(err){
-        return console.log(err);
-    }else {
-        console.log("rename sucessfully");
-    }
-	
-				});		
-		   }
+				//rename - first copy second delete
+				var re_name = new AWS.S3();
+
+				rename.addEventListener('click', function(){
+					
+						var params3 = {
+							Bucket: 'deadlinefighters',
+							Key: 'Test1！.zip',
+						};
+					
+						var params4 = {
+							Bucket: 'deadlinefighters',
+							CopySource: '/deadlinefighters/Test1！.zip',
+							Key: '2！.zip',	
+						};
+
+						re_name.copyObject(params4, function (err, data) {
+							if (err){
+
+								console.log(err, err.stack);
+							}
+							else { 
+
+								console.log(data); 
+						   
+								re_name.deleteObject(params3, function (err, data) {
+									if(err){
+										return console.log(err);
+									}
+									else {
+										console.log("rename sucessfully");
+									}
+								});		
+							}
+						});	
 				});	
-	
-});
-	
-		
-		
-		
-		
-    </script>
-	
-	
-	
-</body>
+			</script>	
+	</body>
 </html>
