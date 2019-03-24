@@ -27,14 +27,7 @@ s3_resource = boto3.resource('s3');
 bucketName = "deadlinefighters";
 syncDir = homeDir+"/deadlinefighters/";
 
-###### Utility functions ######
 
-def is_json(myjson):
-    try:
-        json_object = json.loads(str(myjson))
-    except ValueError as e:
-        return False
-    return True
 
 ###### AWS Operations ######
 
@@ -138,6 +131,7 @@ def run(server_class=HTTPServer, handler_class=S, port=80):
     httpd = server_class(server_address, handler_class)
     print 'Starting deadlinefighters server...'
     httpd.serve_forever()
+    return
 
 if __name__ == "__main__":
     from sys import argv
