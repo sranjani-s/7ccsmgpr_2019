@@ -49,10 +49,8 @@
 		
 		
 			<script type="text/javascript">
-				/// <reference types="aws-sdk" />
-				/// Load the SDK for JavaScript
-				// var AWS = require('aws-sdk');
-				//login aws by using credentials to upload
+
+				//AWS credentials
 				var credentials = {
 						accessKeyId: 'xxxx',//use individual accessKeyId
 						secretAccessKey: 'xxxx'//use individual secretAccessKey
@@ -63,8 +61,8 @@
 				AWS.config.region = 'eu-west-2';
 
 				var xhr = new XMLHttpRequest();
-				var url = "http://10.40.129.248:80";
-				var data;
+				var url = "http://10.40.182.16:80"; //static IP for Siva's machine
+				var data,dir;
 				
 				
 				// create bucket instance
@@ -77,6 +75,151 @@
 				var edit = document.getElementById('edit-button');
 				var sync = document.getElementById('sync-button');
 				var results = document.getElementById('results');
+				
+				function onLoadFunctions(){
+					//create folder
+
+					var fs = require('fs');
+					var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
+					if(isMacLike){
+						dir = require('os').homedir()+"/deadlinefighters";
+						if(!fs.existsSync(dir)){
+							fs.mkdir(dir,function(err){
+
+							   if (err) {
+								   return console.error(err);
+							   }
+							   console.log("folder created successfully.");
+							});
+						}
+					}
+					else{
+						dir = "D:\\deadlinefighters\\";
+						if(!fs.existsSync(dir)){		
+							fs.mkdir(dir,function(err){
+
+							   if (err) {
+								   return console.error(err);
+							   }
+							   console.log("folder created successfully.");
+							});
+						}
+					}
+
+					xhr.open("POST", url, true);
+
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						data = JSON.stringify({"operation": "syncAll", "bucketName": "deadlinefighters", "fileDetails": {"fileName": "All"}});
+
+						xhr.onreadystatechange = function () {
+
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("SyncAll successful with status code: " + xhr.status);
+								results.innerHTML = 'SYNCED!';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data); 
+				}
+
+				window.onload = onLoadFunctions;
+
+				//Generic function for AWS Calls: Not used right now. Code to be refactored to remove redundancy
+
+				function awsCall(operation,fileName){
+					xhr.open("POST", url, true);
+					xhr.setRequestHeader("Content-Type", "application/json");
+					results.innerHTML = '';
+
+					data = JSON.stringify({"operation": operation, "bucketName": "deadlinefighters", "fileDetails": {"fileName": fileName}});
+
+					xhr.onreadystatechange = function () {
+						if (xhr.readyState === 4 && xhr.status === 200) {
+							console.log("Status code of "+operation+" : " + xhr.status);
+							results.innerHTML = operation+' SUCCESS!';
+						}
+						else if(xhr.status!=200) {
+							results.innerHTML = 'ERROR!';
+						}
+					};
+					xhr.send(data);
+				}
+
+				
+				//File Watcher
+				var chokidar = require('chokidar')
+				var watcher = chokidar.watch(dir, {
+								  ignored: /[\/\\]\./,
+								  persistent: true
+							  });
+
+				watcher
+				  .on('add', function(dir) {
+						console.log('File', dir, 'has been added');
+						xhr.open("POST", url, true);
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": dir.replace(/^.*[\\\/]/, '')}});
+
+						xhr.onreadystatechange = function () {
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("Status code of uploadFile: " + xhr.status);
+								results.innerHTML = 'UPLOADED';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data);
+						
+				  })
+				  .on('addDir', function(dir) {
+						console.log('Directory', dir, 'has been added');
+				  })
+				  .on('change', function(dir) {
+					   console.log('File', dir, 'has been changed');
+				  })
+				  .on('unlink', function(dir) {
+						console.log('File', dir, 'has been removed');
+
+						xhr.open("POST", url, true);
+
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": dir.replace(/^.*[\\\/]/, '')}});
+
+						xhr.onreadystatechange = function () {
+
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("Delete successful with status code: " + xhr.status);
+								results.innerHTML = 'DELETED!';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data);
+
+				  })
+				  .on('unlinkDir', function(dir) {
+					   console.log('Directory', dir, 'has been removed');
+				  })
+				  .on('error', function(error) {
+					   console.log('Error happened', error);
+				  })
+				  .on('raw', function(event, dir, details) {
+					   // This event should be triggered everytime something happens.
+					   console.log('Raw event info:', event, dir, details);
+				  }); 
+			
+
+				//Upload function
 				upload.addEventListener('click', function () {
 
 					var file = fileChooser.files[0];
@@ -104,40 +247,10 @@
 					}
 
 				}, false);
-				
-			
-				//create folder
-
-				var fs = require('fs');
-				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
-				if(isMacLike){
-					const dir = require('os').homedir()+"/deadlinefighters";
-					if(!fs.existsSync(dir)){
-						fs.mkdir(dir,function(err){
-
-						   if (err) {
-							   return console.error(err);
-						   }
-						   console.log("folder created successfully.");
-						});
-					}
-				}
-				else{
-					var dir = "D:\\deadlinefighters\\";
-					if(!fs.existsSync(dir)){		
-						fs.mkdir(dir,function(err){
-
-						   if (err) {
-							   return console.error(err);
-						   }
-						   console.log("folder created successfully.");
-						});
-					}
-				}
 						
 				
 				
-				//list
+				//list all files on the server
 				bucket.listObjects({}, function(err, data) {
 
 					if (err) 
@@ -157,79 +270,36 @@
 				
 			  
 			  
-					//sync
+					//sync: pull before push
 					$(sync).click(function(){
 
-						var fs = require("fs"); 
-						var bucket2 = 'deadlinefighters';
+						console.log("Entered syncbtn");
 
-						fs.readdir('D:\\deadlinefighters\\',function(err,files){
-							console.log(files);
-							var s3_upload = new AWS.S3();
-							 
-                        $.each(files, function(i, filecontent) {     
-	                        fs.readFile('D:\\deadlinefighters\\'+filecontent, function (err, data) {
-                                if (err) {
-                                    return console.error(err);
-                                }
-						    results.innerHTML = '';
-				            var params_upload = {Bucket: bucket2, Key: filecontent, Body: data, 'Access-Control-Allow-Credentials': '*','ACL': 'public-read'};
-				            s3_upload.upload(params_upload, function (err, data) {
-					        console.log(err); 
-					        results.innerHTML = err ? 'ERROR!' : 'UPLOADED.';
-				                    });
-                                });		
-                            }); 
-						});
-				  
-						  
-				  
-		  				bucket.listObjects({}, function(err, data) {
+						xhr.open("POST", url, true);
 
-							if (err){ 
-								console.log(err, err.stack); // an error occurred 
-							} 
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
 
-							var objects = data.Contents;	  
-							$.each(objects, function(i, content) {
+						data = JSON.stringify({"operation": "syncAll", "bucketName": "deadlinefighters", "fileDetails": {"fileName": "All"}});
 
-								var fs = require('fs');	
-								var file = content.Key;
+						xhr.onreadystatechange = function () {
 
-								console.log(file);  
-
-								var filePath = '/deadlinefighters'+'/' + file;
-
-								console.log(filePath); 
-
-								var bucket1 = 'deadlinefighters';
-								var aws_download = new AWS.S3();
-								   
-								var params1 = {
-									Bucket: bucket1,
-									Key: file
-								};
-
-								aws_download.getObject(params1, function(err, data) {
-
-									if (err) {
-										console.error(err);
-									}
-									else{
-										fs.writeFileSync(filePath, data.Body);
-										console.log("download sucessfully");
-									}
-								});
-							});
-			
-						}); 
-		 			});
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("SyncAll successful with status code: " + xhr.status);
+								results.innerHTML = 'SYNCED!';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data); 
+					});
 			  
 				
 			  
 			  
-					//Select a special file to download and delete
-			  		$('#objectList').on("click",'button',function(){
+					//Select a file to download or delete
+					$('#objectList').on("click",'button',function(){
 						var i = $(this).attr('id');
 						var downloadbtn = $("<button id='download'></button>").text("download");
 						var deletebtn = $("<button id='delete'></button>").text("delete");
@@ -272,7 +342,7 @@
 									}
 								};
 								xhr.send(data);
-				  		});
+						});
 
 				  
 						$(deletebtn).click(function(){
@@ -297,7 +367,7 @@
 									}
 								};
 								xhr.send(data);
-				  		});
+						});
 					});
 				});
 		
@@ -320,11 +390,11 @@
 						};
 
 						re_name.copyObject(params4, function (err, data) {
-				   			if (err){
+							if (err){
 
-				   				console.log(err, err.stack);
-				   			}
-				   			else { 
+								console.log(err, err.stack);
+							}
+							else { 
 
 								console.log(data); 
 						   
@@ -336,7 +406,7 @@
 										console.log("rename sucessfully");
 									}
 								});		
-						   	}
+							}
 						});	
 				});	
 			</script>	
