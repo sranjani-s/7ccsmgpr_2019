@@ -76,35 +76,57 @@
 				var sync = document.getElementById('sync-button');
 				var results = document.getElementById('results');
 				
-			
-				//create folder
+				function onLoadFunctions(){
+					//create folder
 
-				var fs = require('fs');
-				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
-				if(isMacLike){
-					dir = require('os').homedir()+"/deadlinefighters";
-					if(!fs.existsSync(dir)){
-						fs.mkdir(dir,function(err){
+					var fs = require('fs');
+					var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
+					if(isMacLike){
+						dir = require('os').homedir()+"/deadlinefighters";
+						if(!fs.existsSync(dir)){
+							fs.mkdir(dir,function(err){
 
-						   if (err) {
-							   return console.error(err);
-						   }
-						   console.log("folder created successfully.");
-						});
+							   if (err) {
+								   return console.error(err);
+							   }
+							   console.log("folder created successfully.");
+							});
+						}
 					}
-				}
-				else{
-					dir = "D:\\deadlinefighters\\";
-					if(!fs.existsSync(dir)){		
-						fs.mkdir(dir,function(err){
+					else{
+						dir = "D:\\deadlinefighters\\";
+						if(!fs.existsSync(dir)){		
+							fs.mkdir(dir,function(err){
 
-						   if (err) {
-							   return console.error(err);
-						   }
-						   console.log("folder created successfully.");
-						});
+							   if (err) {
+								   return console.error(err);
+							   }
+							   console.log("folder created successfully.");
+							});
+						}
 					}
+
+					xhr.open("POST", url, true);
+
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						data = JSON.stringify({"operation": "syncAll", "bucketName": "deadlinefighters", "fileDetails": {"fileName": "All"}});
+
+						xhr.onreadystatechange = function () {
+
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								console.log("SyncAll successful with status code: " + xhr.status);
+								results.innerHTML = 'SYNCED!';
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data); 
 				}
+
+				window.onload = onLoadFunctions;
 
 				//Generic function for AWS Calls: Not used right now. Code to be refactored to remove redundancy
 
