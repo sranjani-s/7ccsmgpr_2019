@@ -43,20 +43,22 @@ def download_file(fileName):
 		return json.dumps({'url':url})
 
 def delete_file(fileName):
-		print(bucketName)
-		print(fileName)
-		s3_resource.Object(bucketName, fileName).delete()
-		print("Deleted file "+fileName)
-		return
+		print("Call for delete")
+		url = s3.generate_presigned_url('delete_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100)
+		return json.dumps({'url':url})
 
 
 def download_All():
-		bucket = s3_resource.Bucket(bucketName)
-		for s3_object in bucket.objects.all():
-			path, filename = os.path.split(s3_object.key)
-			download_file(filename)
-		print("All files downloaded from bucket "+bucketName)
-		return
+		print("Call for download_All")
+		objectListDict = s3.list_objects(Bucket = bucketName)
+		finalJson = []
+		for objects in objectListDict['Contents']:
+			itemJson = dict()
+			itemJson['fileName'] = objects['Key']
+			urlJson = download_file(objects['Key'])
+			itemJson['url'] = json.loads(urlJson)['url']
+			finalJson.append(itemJson)
+		return json.dumps({'downloadAll':finalJson})
 
 def upload_All():
 		for f in listdir(syncDir):
@@ -67,9 +69,9 @@ def upload_All():
 
 #Sync: Pull before Push
 def sync_All(fileName):
-		download_All()
-		upload_All()
-		print("SyncAll complete!")
+		print("Call for sync_All")
+		return download_All()
+		
 
 
 switcher = {
