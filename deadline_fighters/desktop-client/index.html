@@ -82,7 +82,7 @@
 				var fs = require('fs');
 				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
 				if(isMacLike){
-					dir = require('os').homedir()+"/deadlinefighters";
+					dir = require('os').homedir()+"/deadlinefighters/";
 					if(!fs.existsSync(dir)){
 						fs.mkdir(dir,function(err){
 
@@ -138,7 +138,7 @@
 				watcher
 				  .on('add', function(dir) {
 						console.log('File', dir, 'has been added');
-						xhr.open("POST", url, true);
+						/*xhr.open("POST", url, true);
 						xhr.setRequestHeader("Content-Type", "application/json");
 						results.innerHTML = '';
 
@@ -153,7 +153,7 @@
 								results.innerHTML = 'ERROR!';
 							}
 						};
-						xhr.send(data);
+						xhr.send(data);*/
 						
 				  })
 				  .on('addDir', function(dir) {
@@ -165,7 +165,7 @@
 				  .on('unlink', function(dir) {
 						console.log('File', dir, 'has been removed');
 
-						xhr.open("POST", url, true);
+						/*xhr.open("POST", url, true);
 
 						xhr.setRequestHeader("Content-Type", "application/json");
 						results.innerHTML = '';
@@ -182,7 +182,7 @@
 								results.innerHTML = 'ERROR!';
 							}
 						};
-						xhr.send(data);
+						xhr.send(data);*/
 
 				  })
 				  .on('unlinkDir', function(dir) {
@@ -240,8 +240,6 @@
 					var objects = data.Contents;
 					  
 					$.each(objects, function(i, content) {
-						//successful response in console
-						console.log(data);  
 						//list the file name to the page
 						$('#objectList').append("<button  id="+i+" value= '"+content.Key+"'>"+content.Key+"</button><br>");
 					}); 
@@ -286,6 +284,8 @@
 
 
 						var fs = require('fs');	
+						var httpreq = require('httpreq');
+
 						var file = $(this).val();
 
 						console.log(file);  
@@ -312,8 +312,17 @@
 								xhr.onreadystatechange = function () {
 
 									if (xhr.readyState === 4 && xhr.status === 200) {
-										console.log("Download successful with status code: " + xhr.status);
-										results.innerHTML = 'DOWNLOADED!';
+										jsonResponse = JSON.parse(xhr.responseText);
+										httpreq.download(jsonResponse["url"], dir+file, file, function (err, progress){
+  											if (err) 
+  												return console.log(err);
+  											console.log(progress);
+
+  										}, function(err,res){
+  											if (err)
+  												return console.log(err);
+  											console.log(res);
+  										});
 									}
 									else if(xhr.status!=200) {
 										results.innerHTML = 'ERROR!';
