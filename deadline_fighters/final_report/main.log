@@ -1,0 +1,924 @@
+This is pdfTeX, Version 3.14159265-2.6-1.40.19 (TeX Live 2018) (preloaded format=pdflatex 2019.2.6)  26 MAR 2019 14:47
+entering extended mode
+ restricted \write18 enabled.
+ %&-line parsing enabled.
+**main.tex
+(./main.tex
+LaTeX2e <2018-04-01> patch level 2
+Babel <3.18> and hyphenation patterns for 84 language(s) loaded.
+(/usr/local/texlive/2018/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+(/usr/local/texlive/2018/texmf-dist/tex/latex/base/size10.clo
+File: size10.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+)
+\c@part=\count80
+\c@section=\count81
+\c@subsection=\count82
+\c@subsubsection=\count83
+\c@paragraph=\count84
+\c@subparagraph=\count85
+\c@figure=\count86
+\c@table=\count87
+\abovecaptionskip=\skip41
+\belowcaptionskip=\skip42
+\bibindent=\dimen102
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/geometry/geometry.sty
+Package: geometry 2018/03/24 v5.7 Page Geometry
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/keyval.sty
+Package: keyval 2014/10/28 v1.15 key=value parser (DPC)
+\KV@toks@=\toks14
+)
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ifpdf.sty
+Package: ifpdf 2017/03/15 v3.2 Provides the ifpdf switch
+)
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ifvtex.sty
+Package: ifvtex 2016/05/16 v1.6 Detect VTeX and its facilities (HO)
+Package ifvtex Info: VTeX not detected.
+)
+(/usr/local/texlive/2018/texmf-dist/tex/generic/ifxetex/ifxetex.sty
+Package: ifxetex 2010/09/12 v0.6 Provides ifxetex conditional
+)
+\Gm@cnth=\count88
+\Gm@cntv=\count89
+\c@Gm@tempcnt=\count90
+\Gm@bindingoffset=\dimen103
+\Gm@wd@mp=\dimen104
+\Gm@odd@mp=\dimen105
+\Gm@even@mp=\dimen106
+\Gm@layoutwidth=\dimen107
+\Gm@layoutheight=\dimen108
+\Gm@layouthoffset=\dimen109
+\Gm@layoutvoffset=\dimen110
+\Gm@dimlist=\toks15
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/graphicx.sty
+Package: graphicx 2017/06/01 v1.1a Enhanced LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/graphics.sty
+Package: graphics 2017/06/25 v1.2c Standard LaTeX Graphics (DPC,SPQR)
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/trig.sty
+Package: trig 2016/01/03 v1.10 sin cos tan (DPC)
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics-cfg/graphics.cfg
+File: graphics.cfg 2016/06/04 v1.11 sample graphics configuration
+)
+Package graphics Info: Driver file: pdftex.def on input line 99.
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics-def/pdftex.def
+File: pdftex.def 2018/01/08 v1.0l Graphics/color driver for pdftex
+))
+\Gin@req@height=\dimen111
+\Gin@req@width=\dimen112
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/graphics/rotating.sty
+Package: rotating 2016/08/11 v2.16d rotated objects in LaTeX
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/base/ifthen.sty
+Package: ifthen 2014/09/29 v1.1c Standard LaTeX ifthen package (DPC)
+)
+\c@r@tfl@t=\count91
+\rotFPtop=\skip43
+\rotFPbot=\skip44
+\rot@float@box=\box26
+\rot@mess@toks=\toks16
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/multirow/multirow.sty
+Package: multirow 2016/11/25 v2.2 Span multiple rows of a table
+\multirow@colwidth=\skip45
+\multirow@cntb=\count92
+\multirow@dima=\skip46
+\bigstrutjot=\dimen113
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/setspace/setspace.sty
+Package: setspace 2011/12/19 v6.7a set line spacing
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/float/float.sty
+Package: float 2001/11/08 v1.3d Float enhancements (AL)
+\c@float@type=\count93
+\float@exts=\toks17
+\float@box=\box27
+\@float@everytoks=\toks18
+\@floatcapt=\box28
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/caption/caption.sty
+Package: caption 2016/02/21 v3.3-144 Customizing captions (AR)
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/caption/caption3.sty
+Package: caption3 2016/05/22 v1.7-166 caption3 kernel (AR)
+Package caption3 Info: TeX engine: e-TeX on input line 67.
+\captionmargin=\dimen114
+\captionmargin@=\dimen115
+\captionwidth=\dimen116
+\caption@tempdima=\dimen117
+\caption@indent=\dimen118
+\caption@parindent=\dimen119
+\caption@hangindent=\dimen120
+)
+\c@ContinuedFloat=\count94
+Package caption Info: float package is loaded.
+Package caption Info: rotating package is loaded.
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/tools/tabularx.sty
+Package: tabularx 2016/02/03 v2.11b `tabularx' package (DPC)
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/tools/array.sty
+Package: array 2018/04/07 v2.4g Tabular extension package (FMi)
+\col@sep=\dimen121
+\ar@mcellbox=\box29
+\extrarowheight=\dimen122
+\NC@list=\toks19
+\extratabsurround=\skip47
+\backup@length=\skip48
+\ar@cellbox=\box30
+)
+\TX@col@width=\dimen123
+\TX@old@table=\dimen124
+\TX@old@col=\dimen125
+\TX@target=\dimen126
+\TX@delta=\dimen127
+\TX@cols=\count95
+\TX@ftn=\toks20
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/ms/ragged2e.sty
+Package: ragged2e 2009/05/21 v2.1 ragged2e Package (MS)
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/ms/everysel.sty
+Package: everysel 2011/10/28 v1.2 EverySelectfont Package (MS)
+)
+\CenteringLeftskip=\skip49
+\RaggedLeftLeftskip=\skip50
+\RaggedRightLeftskip=\skip51
+\CenteringRightskip=\skip52
+\RaggedLeftRightskip=\skip53
+\RaggedRightRightskip=\skip54
+\CenteringParfillskip=\skip55
+\RaggedLeftParfillskip=\skip56
+\RaggedRightParfillskip=\skip57
+\JustifyingParfillskip=\skip58
+\CenteringParindent=\skip59
+\RaggedLeftParindent=\skip60
+\RaggedRightParindent=\skip61
+\JustifyingParindent=\skip62
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/booktabs/booktabs.sty
+Package: booktabs 2016/04/27 v1.618033 publication quality tables
+\heavyrulewidth=\dimen128
+\lightrulewidth=\dimen129
+\cmidrulewidth=\dimen130
+\belowrulesep=\dimen131
+\belowbottomsep=\dimen132
+\aboverulesep=\dimen133
+\abovetopsep=\dimen134
+\cmidrulesep=\dimen135
+\cmidrulekern=\dimen136
+\defaultaddspace=\dimen137
+\@cmidla=\count96
+\@cmidlb=\count97
+\@aboverulesep=\dimen138
+\@belowrulesep=\dimen139
+\@thisruleclass=\count98
+\@lastruleclass=\count99
+\@thisrulewidth=\dimen140
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/titling/titling.sty
+Package: titling 2009/09/04 v2.1d maketitle typesetting
+\thanksmarkwidth=\skip63
+\thanksmargin=\skip64
+\droptitle=\skip65
+) (./main.aux
+
+LaTeX Warning: Label `table:conflict' multiply defined.
+
+
+LaTeX Warning: Label `Amazon S3' multiply defined.
+
+)
+\openout1 = `main.aux'.
+
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 24.
+LaTeX Font Info:    ... okay on input line 24.
+
+*geometry* driver: auto-detecting
+*geometry* detected driver: pdftex
+*geometry* verbose mode - [ preamble ] result:
+* driver: pdftex
+* paper: a4paper
+* layout: <same size as paper>
+* layoutoffset:(h,v)=(0.0pt,0.0pt)
+* modes: 
+* h-part:(L,W,R)=(28.90755pt, 539.69278pt, 28.90755pt)
+* v-part:(T,H,B)=(28.90755pt, 787.23175pt, 28.90755pt)
+* \paperwidth=597.50787pt
+* \paperheight=845.04684pt
+* \textwidth=539.69278pt
+* \textheight=787.23175pt
+* \oddsidemargin=-43.36244pt
+* \evensidemargin=-43.36244pt
+* \topmargin=-80.36244pt
+* \headheight=12.0pt
+* \headsep=25.0pt
+* \topskip=10.0pt
+* \footskip=30.0pt
+* \marginparwidth=57.0pt
+* \marginparsep=11.0pt
+* \columnsep=10.0pt
+* \skip\footins=9.0pt plus 4.0pt minus 2.0pt
+* \hoffset=0.0pt
+* \voffset=0.0pt
+* \mag=1000
+* \@twocolumnfalse
+* \@twosidefalse
+* \@mparswitchfalse
+* \@reversemarginfalse
+* (1in=72.27pt=25.4mm, 1cm=28.453pt)
+
+(/usr/local/texlive/2018/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+\scratchcounter=\count100
+\scratchdimen=\dimen141
+\scratchbox=\box31
+\nofMPsegments=\count101
+\nofMParguments=\count102
+\everyMPshowfont=\toks21
+\MPscratchCnt=\count103
+\MPscratchDim=\dimen142
+\MPnumerator=\count104
+\makeMPintoPDFobject=\count105
+\everyMPtoPDFconversion=\toks22
+) (/usr/local/texlive/2018/texmf-dist/tex/latex/oberdiek/epstopdf-base.sty
+Package: epstopdf-base 2016/05/15 v2.6 Base part for package epstopdf
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/infwarerr.sty
+Package: infwarerr 2016/05/16 v1.4 Providing info/warning/error messages (HO)
+)
+(/usr/local/texlive/2018/texmf-dist/tex/latex/oberdiek/grfext.sty
+Package: grfext 2016/05/16 v1.2 Manage graphics extensions (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/kvdefinekeys.sty
+Package: kvdefinekeys 2016/05/16 v1.4 Define keys (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ltxcmds.sty
+Package: ltxcmds 2016/05/16 v1.23 LaTeX kernel commands for general use (HO)
+)))
+(/usr/local/texlive/2018/texmf-dist/tex/latex/oberdiek/kvoptions.sty
+Package: kvoptions 2016/05/16 v3.12 Key value format for package options (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/kvsetkeys.sty
+Package: kvsetkeys 2016/05/16 v1.17 Key value parser (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/etexcmds.sty
+Package: etexcmds 2016/05/16 v1.6 Avoid name clashes with e-TeX commands (HO)
+
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/ifluatex.sty
+Package: ifluatex 2016/05/16 v1.4 Provides the ifluatex switch (HO)
+Package ifluatex Info: LuaTeX not detected.
+)
+Package etexcmds Info: Could not find \expanded.
+(etexcmds)             That can mean that you are not using pdfTeX 1.50 or
+(etexcmds)             that some package has redefined \expanded.
+(etexcmds)             In the latter case, load this package earlier.
+)))
+(/usr/local/texlive/2018/texmf-dist/tex/generic/oberdiek/pdftexcmds.sty
+Package: pdftexcmds 2018/01/30 v0.27 Utility functions of pdfTeX for LuaTeX (HO
+)
+Package pdftexcmds Info: LuaTeX not detected.
+Package pdftexcmds Info: \pdf@primitive is available.
+Package pdftexcmds Info: \pdf@ifprimitive is available.
+Package pdftexcmds Info: \pdfdraftmode found.
+)
+Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
+38.
+Package grfext Info: Graphics extension search list:
+(grfext)             [.pdf,.png,.jpg,.mps,.jpeg,.jbig2,.jb2,.PDF,.PNG,.JPG,.JPE
+G,.JBIG2,.JB2,.eps]
+(grfext)             \AppendGraphicsExtensions on input line 456.
+
+(/usr/local/texlive/2018/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
+e
+))
+Package caption Info: Begin \AtBeginDocument code.
+Package caption Info: End \AtBeginDocument code.
+
+ABD: EverySelectfont initializing macros
+LaTeX Info: Redefining \selectfont on input line 24.
+
+Underfull \hbox (badness 10000) in paragraph at lines 36--38
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 36--38
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 36--38
+
+ []
+
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <7> on input line 45.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line 45.
+
+Overfull \hbox (1.18117pt too wide) in paragraph at lines 46--46
+ []|\OT1/cmr/bx/n/10 Step| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 46--46
+ []|\OT1/cmr/bx/n/10 Process| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 47--47
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 48--48
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 49--49
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 50--50
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 51--51
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 52--52
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 53--53
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 54--54
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 55--55
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 56--56
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 57--57
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 58--58
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 59--59
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 60--60
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 61--61
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 62--62
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 63--63
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 65--65
+ | 
+ []
+
+
+Overfull \hbox (15.0pt too wide) in paragraph at lines 42--69
+[]$[]$ 
+ []
+
+[1
+
+{/usr/local/texlive/2018/texmf-var/fonts/map/pdftex/updmap/pdftex.map}]
+Underfull \hbox (badness 10000) in paragraph at lines 70--71
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 70--71
+
+ []
+
+<code1.jpg, id=9, 245.11575pt x 179.4705pt>
+File: code1.jpg Graphic file (type jpg)
+<use code1.jpg>
+Package pdftex.def Info: code1.jpg  used on input line 76.
+(pdftex.def)             Requested size: 318.65042pt x 233.3116pt.
+[2]
+Underfull \hbox (badness 10000) in paragraph at lines 81--82
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 81--82
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 83--84
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 83--84
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--86
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 85--86
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 88--89
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 88--89
+
+ []
+
+<code2.jpg, id=15, 464.937pt x 116.8365pt>
+File: code2.jpg Graphic file (type jpg)
+<use code2.jpg>
+Package pdftex.def Info: code2.jpg  used on input line 92.
+(pdftex.def)             Requested size: 557.9216pt x 140.2031pt.
+
+Overfull \hbox (18.22882pt too wide) in paragraph at lines 92--93
+ [][] 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 97--99
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 97--99
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 97--99
+
+ []
+
+
+! LaTeX Error: There's no line here to end.
+
+See the LaTeX manual or LaTeX Companion for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.101 \emph{var file = \$(this).val();}\\\\
+                                           
+? 
+[3 <./code1.jpg> <./code2.jpg>]
+<code3.jpg, id=20, 334.851pt x 170.43675pt>
+File: code3.jpg Graphic file (type jpg)
+<use code3.jpg>
+Package pdftex.def Info: code3.jpg  used on input line 109.
+(pdftex.def)             Requested size: 401.81918pt x 204.52304pt.
+
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 114--115
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 116--117
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 116--117
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 118--119
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 118--119
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 120--121
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 120--121
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 127--127
+ []|\OT1/cmr/bx/n/10 Function| 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 128--128
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 129--129
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 130--130
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 131--131
+ | 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 133--133
+ | 
+ []
+
+
+Overfull \hbox (15.0pt too wide) in paragraph at lines 123--138
+[]$[]$ 
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--143
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 142--143
+
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--186
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--186
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--186
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--186
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--186
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--186
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--186
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 179--186
+
+ []
+
+[4 <./code3.jpg>] (./test.tex
+! Missing number, treated as zero.
+<to be read again> 
+                   \let 
+l.8 \centering
+              
+? 
+! Illegal unit of measure (pt inserted).
+<to be read again> 
+                   \let 
+l.8 \centering
+              
+? 
+<test_case.png, id=25, 752.8125pt x 696.6025pt>
+File: test_case.png Graphic file (type png)
+<use test_case.png>
+Package pdftex.def Info: test_case.png  used on input line 9.
+(pdftex.def)             Requested size: 376.40532pt x 348.3004pt.
+
+Overfull \hbox (376.40532pt too wide) in paragraph at lines 9--10
+[][] 
+ []
+
+! Missing number, treated as zero.
+<to be read again> 
+                   \let 
+l.12 \end{minipage}
+                   
+? 
+! Illegal unit of measure (pt inserted).
+<to be read again> 
+                   \let 
+l.12 \end{minipage}
+                   
+? 
+) (./Requirements_and_design.tex
+Underfull \hbox (badness 10000) in paragraph at lines 3--1
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3--1
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 3--1
+
+ []
+
+[5]
+Underfull \hbox (badness 10000) in paragraph at lines 3--5
+
+ []
+
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 6.
+(/usr/local/texlive/2018/texmf-dist/tex/latex/base/omscmr.fd
+File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+)
+LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 6.
+
+Underfull \hbox (badness 10000) in paragraph at lines 21--21
+[]|\OT1/cmr/m/n/10 One file
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 21--21
+\OT1/cmr/m/n/10 (May not
+ []
+
+
+Underfull \hbox (badness 1248) in paragraph at lines 21--21
+\OT1/cmr/m/n/10 in the lo-cal
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 21--22
+[]|\OT1/cmr/m/n/10 Priority de-scrip-
+ []
+
+
+Underfull \hbox (badness 4805) in paragraph at lines 23--23
+[]|\OT1/cmr/m/n/10 All files in
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 23--23
+\OT1/cmr/m/n/10 the lo-cal
+ []
+
+
+Underfull \hbox (badness 1348) in paragraph at lines 25--26
+[]|\OT1/cmr/m/n/10 2. Char-ac-ter-is-tic
+ []
+
+
+Overfull \vbox (0.64447pt too high) detected at line 41
+ []
+
+
+Underfull \hbox (badness 4805) in paragraph at lines 41--41
+[]|\OT1/cmr/m/n/10 All files in
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 41--41
+\OT1/cmr/m/n/10 the server
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11--45
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11--45
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 11--45
+
+ []
+
+[6 <./test_case.png>]
+Underfull \hbox (badness 10000) in paragraph at lines 48--50
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--121
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--121
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--121
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--121
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 117--121
+
+ []
+
+[7]
+! Missing number, treated as zero.
+<to be read again> 
+                   \let 
+l.160 \centering
+                
+? 
+! Illegal unit of measure (pt inserted).
+<to be read again> 
+                   \let 
+l.160 \centering
+                
+? 
+<User_use_case.png, id=38, 760.8425pt x 891.33pt>
+File: User_use_case.png Graphic file (type png)
+<use User_use_case.png>
+Package pdftex.def Info: User_use_case.png  used on input line 161.
+(pdftex.def)             Requested size: 380.42032pt x 445.66391pt.
+
+Overfull \hbox (380.42032pt too wide) in paragraph at lines 161--162
+[][] 
+ []
+
+! Missing number, treated as zero.
+<to be read again> 
+                   \let 
+l.164 \end{minipage}
+                    
+? 
+! Illegal unit of measure (pt inserted).
+<to be read again> 
+                   \let 
+l.164 \end{minipage}
+                    
+? 
+)
+Underfull \hbox (badness 10000) in paragraph at lines 167--194
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 167--194
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 167--194
+
+ []
+
+[8 <./User_use_case.png>]
+Overfull \hbox (2.11052pt too wide) in paragraph at lines 204--206
+[]\OT1/cmr/m/n/10 Upload files on S3, [on-line]Available at: \OT1/cmtt/m/n/10 h
+ttps://blog.csdn.net/qq1147093833/article/details/80267542\OT1/cmr/m/n/10 (Acce
+ssed:
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 208--210
+[]\OT1/cmr/m/n/10 MyDatahack(2018),'Uploading and Down-load-ing Files in S3 wit
+h Node.js'. [on-line] Avail-able at:
+ []
+
+
+Underfull \hbox (badness 4001) in paragraph at lines 208--210
+\OT1/cmtt/m/n/10 https://www.mydatahack.com/uploading-and-downloading-files-in-
+s3-with-node-js/\OT1/cmr/m/n/10 (Accessed: 6 Febru-ary
+ []
+
+[9] (./main.aux)
+
+LaTeX Warning: There were multiply-defined labels.
+
+ )
+(\end occurred inside a group at level 1)
+
+### simple group (level 1) entered at line 26 ({)
+### bottom level 
+Here is how much of TeX's memory you used:
+ 3569 strings out of 492649
+ 56019 string characters out of 6129623
+ 137452 words of memory out of 5000000
+ 7393 multiletter control sequences out of 15000+600000
+ 6324 words of font info for 23 fonts, out of 8000000 for 9000
+ 1141 hyphenation exceptions out of 8191
+ 41i,11n,39p,832b,389s stack positions out of 5000i,500n,10000p,200000b,80000s
+</usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts
+/cm/cmbx10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/
+cm/cmbx12.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/c
+m/cmr10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/
+cmr17.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cm
+sl10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cms
+y10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmti
+10.pfb></usr/local/texlive/2018/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt1
+0.pfb>
+Output written on main.pdf (9 pages, 469916 bytes).
+PDF statistics:
+ 74 PDF objects out of 1000 (max. 8388607)
+ 47 compressed objects within 1 object stream
+ 0 named destinations out of 1000 (max. 500000)
+ 26 words of extra memory for PDF output out of 10000 (max. 10000000)
+
