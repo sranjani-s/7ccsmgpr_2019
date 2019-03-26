@@ -31,7 +31,7 @@
 
 
 \section{Desktop client implementation}
-We made a planning framework when we realized the functionality of the desktop client. We firstly mapped out implementing upload files, download files, delete files, rename files, edit files and other functions. Secondly, implementing the ability to combine available functions into one file synchronization feature. Finally, we will beautify the interface and improve user experience.\\\\
+We made a planning framework when we realized the functionality of the desktop client. We firstly mapped out implementing upload files, download files, delete files, rename files, edit files and other functions. Secondly, implementing the ability to combine available functions into one file synchronization feature. Finally, we beautified the interface and improved user experience.\\\\
 In the process of implementation, the main process is divided into the following steps:\\\\
 
 
@@ -49,24 +49,25 @@ In the process of implementation, the main process is divided into the following
 5  	&  \begin{flushleft}Initial download of a file with a specific name.\end{flushleft}\\\hline
 6   &  \begin{flushleft}Preliminary deletion of files with specific names.\end{flushleft}\\\hline
 7   &  \begin{flushleft}Rename the file on the desktop client and upload it to S3.\end{flushleft}\\\hline
-8   &  \begin{flushleft}Try to use E-tag and MD5 to edit the file and incrementally upload the changed part. Then plan to compare the local file and the last modified time of the server file to upload the modified file, but it is not successful.\end{flushleft}\\\hline
+8   &  \begin{flushleft}Try to use E-tag and MD5 to edit the file and incrementally upload the changed part. Then compare the local file and the last modified time of the server file to upload the modified file, but it is not successful.\end{flushleft}\\\hline
 9   &  \begin{flushleft}Create a folder called deadlinefighters on the local disk.\end{flushleft}\\\hline
 10  &  \begin{flushleft}List all files stored on the server.\end{flushleft}\\\hline
 11  &  \begin{flushleft}Add button function to every listed file.\end{flushleft}\\\hline
 12  &  \begin{flushleft}Click on each individual file, jump out of the two dialogs, download and delete, and perform related operations for specific files.\end{flushleft}\\\hline
-13  &  \begin{flushleft}Plan to simplify syncing, first upload all local files then download all server files.\end{flushleft}\\\hline
+13  &  \begin{flushleft}Simplify syncing, first upload all local files then download all server files.\end{flushleft}\\\hline
 14  &  \begin{flushleft}Get a list of local files and use a loop to add an upload function to each file.\end{flushleft}\\\hline
 15  &  \begin{flushleft}Get a list of server files and use a loop to add a download method to each file.\end{flushleft}\\\hline
 16  &  \begin{flushleft}Add upload all function and download all function to the sync function click event.\end{flushleft}\\\hline
-17  &  \begin{flushleft}Add CSS.\end{flushleft}\\
+17  &  \begin{flushleft}Add CSS.\end{flushleft}\\\hline
+18  &  \begin{flushleft}Package the whole client to a desktop application.\end{flushleft}\\
 \bottomrule[1.25pt]
 \end {tabular}\par
 \bigskip
 \end{minipage}
 
-At the step 4, upload is the first function in file synchronization system that I tried to achieve, html5 had an input method that type = \emph{file}, it will generate a file selector and users can choose a file that in the local disk. I got the element of file in the scripts and put the element in parameters, the parameters that S3 need usually are file name, file type and file content, and file should be uploaded according to the desired format what S3 provided. S3 has an upload method and when desktop sends the parameters, the server will catch and return the error or upload file successfully.\\\\
+At the step 4, upload is the first function in file synchronization system that we tried to achieve, html5 had an input method that type = \emph{file}, it would generate a file selector and users can choose a file that in the local disk. We got the element of file in the scripts and put the element in parameters, the parameters that S3 need usually are file name, file type and file content, and file should be uploaded according to the desired format what S3 provided. S3 has an upload method and when desktop sends the parameters, the server will catch and return the error or upload file successfully.\\\\
 
-At the next step, I firstly added a download function and that can download a special file, like \emph{1.txt}, from server to local. I used \emph{fs} module in node.js, the \emph{fs} module is the file system module, which is responsible for reading and writing files, it needs to introduce \emph{fs} module in code before use, like \emph{var fs = require(“fs”)}. I got the bucket (a storage system in S3) and key (file name) of a file, stored them in a parameter and passed it to \emph{getObject} function in S3 to got the whole element of file. Then I used \emph{fs.writeFileSync(filename, data, [options])}, filename will give a name of file and a path that where this file will be located. 
+At the next step, Letao firstly added a download function and that can download a special file, like \emph{1.txt}, from server to local. Letao used \emph{fs} module in node.js, the \emph{fs} module is the file system module, which is responsible for reading and writing files, it needs to introduce \emph{fs} module in code before use, like \emph{var fs = require(“fs”)}. We got the bucket (a storage system in S3) and key (file name) of a file, stored them in a parameter and passed it to \emph{getObject} function in S3 to got the whole element of file. Then Letao used \emph{fs.writeFileSync(filename, data, [options])}, filename will give a name of file and a path that where this file will be located. 
 
 \begin{figure}[h!]
 \centering
@@ -75,14 +76,14 @@ At the next step, I firstly added a download function and that can download a sp
 \label{fig:code1}
 \end{figure}
 
-At the step 7, because S3 had no direct rename method, I only can copy a special file on the server first and give it a new name, then delete the original file.\\\\
+At the step 7, because S3 had no direct rename method, we only can copy a special file on the server first and give it a new name, then delete the original file.\\\\
 
 As for \emph{edit} function, in our plan, we will handle edited files with delta synchronization. Delta sync is used to synchronize the modified portion of the file instead of re-uploading the entire file, in order to increase the speed of server processing. Delta sync relate to MD5 Algorithm and E-tag.But in the end \emph{edit} did not succeed.\\\\
 
-Considering that the downloaded files need to be stored in a folder for users conveniently view, I tried to add a method to automatically create a folder in local. JavaScript is not allowed to access local files, but \emph{fs} module can help to deal with it. I used \emph{fs.mkdir} function to create a primary directory named \emph{deadlinefighters}.\\\\
+Considering that the downloaded files need to be stored in a folder for users conveniently view, we tried to add a method to automatically create a folder in local. At first, Letao tried to use the \emph{FileSystemobject}, it was an object to process files and folders. But JavaScript always used \emph{ActiveXObject} to create a \emph{FileSystemObject} action file, but \emph{ActiveX} only worked on Internet Explorer. JavaScript is not allowed to access local files, but \emph{fs} module can help to deal with it. I used \emph{fs.mkdir} function to create a primary directory named \emph{deadlinefighters}. But we found the path should be set different on Mac and Windows system, Siva used \emph{navigator.platform} to check what kind of system it is and add diverse formats to build path of folder.\\\\
 
 
-In order to better displayed the files on the server, we designed to list all the files. I cited jQuery to simplify code, firstly, used \emph{listObjects} function which S3 was provided to list all the files in the backstage. Then, got the key (file name) and rendered it to the front-end interface. \emph{\$.each(objects, function(i, content)} is used for traversing the array, the array here is objects, which contained all the file contents, content represents each file, content.Key shows the name of each file.\\\\
+In order to better displayed the files on the server, we designed to list all the files. We used \emph{jQuery} to simplify code, firstly, used \emph{listObjects} function which S3 was provided to list all the files in the backstage. Then, got the key (file name) and rendered it to the front-end interface. \emph{\$.each(objects, function(i, content)} is used for traversing the array, the array here is objects, which contained all the file contents, content represents each file, content.Key shows the name of each file.\\\\
 
 \begin{figure}[h!]
 \centering
@@ -91,15 +92,15 @@ In order to better displayed the files on the server, we designed to list all th
 \label{fig:code2}
 \end{figure}
 
-I changed each line of file to a button and that was convenient to add click events for download and delete functions later.\\\\
-I set two dialogs to one file, one was download function, the other was delete function. The download function was similar with the previous code, key and file path need to be change, just passed the file values obtained by clicking the button to them. The file following represented key and got the corresponding file object from dialog, the file path pointed to the newly created folder.\\\\
+Letao changed each line of file to a button and that was convenient to add click events for download and delete functions later.\\\\
+Letao set two dialogs to one file, one was download function, the other was delete function. The download function was similar with the previous code, key and file path need to be change, just passed the file values obtained by clicking the button to them. The file following represented key and got the corresponding file object from dialog, the file path pointed to the newly created folder.\\\\
 
 \begin{center}
 \emph{var file = \$(this).val();}\\\\
 \emph{var filePath = '/deadlinefighters'+'/' + file;}
 \end{center}
 
-The delete function is something different, when the server file is deleted, the local file will be deleted too. Therefore, I added a loop algorithm to traverse local files for each deleted server file, when the name of the local file is equal to the name of the server file, the local file will also be deleted.
+The delete function is something different, when the server file is deleted, the local file will be deleted too. Therefore, Letao added a loop algorithm to traverse local files for each deleted server file, when the name of the local file is equal to the name of the server file, the local file will also be deleted.
 
 \begin{figure}[h!]
 \centering
@@ -108,7 +109,7 @@ The delete function is something different, when the server file is deleted, the
 \label{fig:code3}
 \end{figure}
 
-Because the files existed under a specific folder, it needed to first specify to the folder directory and then used the loop to get information about each file. At first, when read each file’s name, I didn’t add the \emph{“'D:$\backslash$$\backslash$deadlinefighters$\backslash$$\backslash$'+”} before\\\\
+Because the files existed under a specific folder, it needed to first specify to the folder directory and then used the loop to get information about each file. At first, when read each file’s name, Letao didn’t add the \emph{“'D:$\backslash$$\backslash$deadlinefighters$\backslash$$\backslash$'+”} before\\\\
 
 However, the result returned an error, \emph{filecontent} represented all the data in a file, not only a name, so it can’t compare with the file name in server.\\\\
 
@@ -135,7 +136,81 @@ delete  	&  \begin{flushleft}Delete one file.\end{flushleft}\\
 
 
 
+\section{Evaluation}
+Comparing the design part to the implementation part, here is a table of what design functions are worked and what are not:\\\\
+
+
+
+\begin{table}[h]
+\caption{Priority of operations}
+\centering
+\begin{tabular}{|c|p{8cm}|p{2cm}|}
+\hline
+Operation & Object & Whether it is completed \\
+\hline
+\multirow{Upload}&{One file (May not in the local sync folder)}&Yes\\
+\cline{2-3}
+&All files in the local sync folder&Yes\\
+\cline{1-3}
+\multirow{Download}&{One file}&Yes\\
+\cline{2-3}
+&All files&Yes\\
+\cline{1-3}
+\multirow{Delete}&{One file}&Yes\\
+\cline{2-3}
+&All files&No\\
+\cline{1-3}
+\multirow{Rename}&{One file}&Yes\\
+\cline{2-3}
+&Two or more files&No\\
+\cline{1-3}
+\multirow{Edit}&{One file}&No\\
+\cline{2-3}
+&Two or more files&No\\
+\cline{1-3}
+\multirow{Synchronize}&{All files in the server and local syn folder}&Yes\\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
+
+
+
+As for the desktop client, the \emph{edit} function was not worked. At the beginning, we planned to use the incremental synchronization to handle the files which were changed contents, it means not uploading the whole files but only uploading the part that are different with the original files. We planned to use MD5 to calculate file’s value and transfer the MD5 value to the server, the server determines whether the value of \emph{MD5} is different from the original file.\\\\
+At first, Letao tried to use the \emph{MD5} API of \emph{node.js}, but got a problem when detecting the \emph{MD5} value of the local file, because JavaScript as a web language, it has no access to check all the parts of local files.\\\\
+Then, we tried to use last modified time of files to substitute \emph{MD5}, if the last modified time of local file was different with that on server, the file would be re-uploaded. However, desktop client and mobile client both got some problems with database. For the desktop client, we tried to build a database table of file name and last modified time to store files’ information on server, but there was a problem that at the beginning, our desktop client use sync = upload all files on local + download all file on server, therefore, the last modified time always be changed. For the mobile client, the last modified time on server had different format with that on local and had an impact on the comparison of the two sides.\\\\
+The second part that we not completed was conflicts. At this moment, the Android client only can connect with the S3, not the server application, so the conflicts cannot be solved temporarily. We used Amazon S3 at first, but we found S3 had their own methods to solve conflicts, so we changed to \emph{@be/http-service} to build local server.\\\\
+There are the processes that we did well. Our steps were from simple to difficult, like first upload only one file then upload plenty of files in one folder at the same time. The organized steps made our project had a clear structure. \\\\
+The \emph{upload all} function finally can work automatic, that means the files be added to the \emph{deadlinefighters} folder can be automatically uploaded to server.\\\\ 
+Our desktop client can run on different computer system, like Mac or Windows. It has a strong adaptability.\\\\
+
+
 
 \medskip
+
+\begin{thebibliography}{9}
+\bibitem{Amazon S3} 
+Amazon S3, [online]Available at:
+\texttt{https://docs.aws.amazon.com/AWSJavaScriptSDK/latest/AWS/S3.html}(Accessed: 3 February 2019).
+
+\bibitem{Upload files on S3} 
+Upload files on S3, [online]Available at:
+\texttt{https://blog.csdn.net/qq1147093833/article/details/80267542}(Accessed: 6 February 2019).
+
+\bibitem{Amazon S3} 
+MyDatahack(2018),'Uploading and Downloading Files in S3 with Node.js'. [online] Available at:
+\texttt{https://www.mydatahack.com/uploading-and-downloading-files-in-s3-with-node-js/}(Accessed: 6 February 2019).
+
+
+
+\end{thebibliography}
+
+
+
+
+
 
 \end{document}
