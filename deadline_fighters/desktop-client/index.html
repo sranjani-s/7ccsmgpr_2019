@@ -75,23 +75,24 @@
 				var edit = document.getElementById('edit-button');
 				var sync = document.getElementById('sync-button');
 				var results = document.getElementById('results');
+
+				var fs = require('fs');
+				var httpreq = require('httpreq');
 				
-				function onLoadFunctions(){
-					//create folder
+			
+				//create folder
+				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
+				if(isMacLike){
+            dir = require('os').homedir()+"/deadlinefighters/";
+            if(!fs.existsSync(dir)){
+              fs.mkdir(dir,function(err){
 
-					var fs = require('fs');
-					var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
-					if(isMacLike){
-						dir = require('os').homedir()+"/deadlinefighters";
-						if(!fs.existsSync(dir)){
-							fs.mkdir(dir,function(err){
-
-							   if (err) {
-								   return console.error(err);
-							   }
-							   console.log("folder created successfully.");
-							});
-						}
+                 if (err) {
+                   return console.error(err);
+                 }
+                 console.log("folder created successfully.");
+              });
+            }
 					}
 					else{
 						dir = "D:\\deadlinefighters\\";
@@ -168,8 +169,16 @@
 
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4 && xhr.status === 200) {
-								console.log("Status code of uploadFile: " + xhr.status);
-								results.innerHTML = 'UPLOADED';
+								jsonResponse = JSON.parse(xhr.responseText);
+								console.log("URL obtained:" + jsonResponse["url"]);
+								$.ajax({
+									url: jsonResponse["url"],    //Your api url
+									type: 'PUT',   //type is any HTTP method
+									data: dir,
+									success: function () {
+										results.innerHTML = "Uploaded!"
+									}
+								});
 							}
 							else if(xhr.status!=200) {
 								results.innerHTML = 'ERROR!';
@@ -197,8 +206,16 @@
 						xhr.onreadystatechange = function () {
 
 							if (xhr.readyState === 4 && xhr.status === 200) {
-								console.log("Delete successful with status code: " + xhr.status);
-								results.innerHTML = 'DELETED!';
+								jsonResponse = JSON.parse(xhr.responseText);
+								console.log("URL obtained:" + jsonResponse["url"]);
+								$.ajax({
+									url: jsonResponse["url"],    //Your api url
+									type: 'DELETE',   //type is any HTTP method
+									data: dir,
+									success: function () {
+										results.innerHTML = dir+" deleted!"
+									}
+								});
 							}
 							else if(xhr.status!=200) {
 								results.innerHTML = 'ERROR!';
@@ -262,8 +279,6 @@
 					var objects = data.Contents;
 					  
 					$.each(objects, function(i, content) {
-						//successful response in console
-						console.log(data);  
 						//list the file name to the page
 						$('#objectList').append("<button  id="+i+" value= '"+content.Key+"'>"+content.Key+"</button><br>");
 					}); 
@@ -285,8 +300,23 @@
 						xhr.onreadystatechange = function () {
 
 							if (xhr.readyState === 4 && xhr.status === 200) {
-								console.log("SyncAll successful with status code: " + xhr.status);
-								results.innerHTML = 'SYNCED!';
+								jsonResponse = JSON.parse(xhr.responseText);
+								fileList = jsonResponse['downloadAll'];
+								for(var i = 0; i < fileList.length; i++) {
+									var obj = fileList[i];
+									
+									httpreq.download(obj.url, dir+obj.fileName, obj.fileName, function (err, progress){
+										if (err) 
+											return console.log(err);
+										console.log(progress);
+
+									}, function(err,res){
+										if (err)
+											return console.log(err);
+										console.log(obj.fileName+" downloaded");
+									});
+								}
+								
 							}
 							else if(xhr.status!=200) {
 								results.innerHTML = 'ERROR!';
@@ -308,6 +338,8 @@
 
 
 						var fs = require('fs');	
+						var httpreq = require('httpreq');
+
 						var file = $(this).val();
 
 						console.log(file);  
@@ -334,8 +366,17 @@
 								xhr.onreadystatechange = function () {
 
 									if (xhr.readyState === 4 && xhr.status === 200) {
-										console.log("Download successful with status code: " + xhr.status);
-										results.innerHTML = 'DOWNLOADED!';
+										jsonResponse = JSON.parse(xhr.responseText);
+										httpreq.download(jsonResponse["url"], dir+file, file, function (err, progress){
+											if (err) 
+												return console.log(err);
+											console.log(progress);
+
+										}, function(err,res){
+											if (err)
+												return console.log(err);
+											console.log(res);
+										});
 									}
 									else if(xhr.status!=200) {
 										results.innerHTML = 'ERROR!';
