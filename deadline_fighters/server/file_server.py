@@ -33,17 +33,17 @@ s3 = session.client('s3')
 ###### AWS Operations ######
 
 def upload_file(fileName):
-		print("Call for upload")
+		print("Call for upload for file "+ fileName)
 		url = s3.generate_presigned_url('put_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100, HttpMethod = 'PUT')
 		return json.dumps({'url':url})
 
 def download_file(fileName):
-		print("Call for download")
+		print("Call for download for file "+ fileName)
 		url = s3.generate_presigned_url('get_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100)
 		return json.dumps({'url':url})
 
 def delete_file(fileName):
-		print("Call for delete")
+		print("Call for delete for file "+ fileName)
 		url = s3.generate_presigned_url('delete_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100)
 		return json.dumps({'url':url})
 

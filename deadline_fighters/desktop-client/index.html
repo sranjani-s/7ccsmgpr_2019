@@ -170,7 +170,6 @@
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4 && xhr.status === 200) {
 								jsonResponse = JSON.parse(xhr.responseText);
-								console.log("URL obtained:" + jsonResponse["url"]);
 								$.ajax({
 									url: jsonResponse["url"],    //Your api url
 									type: 'PUT',   //type is any HTTP method
@@ -388,26 +387,33 @@
 				  
 						$(deletebtn).click(function(){
 
-								console.log("Entered deletebtn");
+							xhr.open("POST", url, true);
 
-								xhr.open("POST", url, true);
+							xhr.setRequestHeader("Content-Type", "application/json");
+							results.innerHTML = '';
 
-								xhr.setRequestHeader("Content-Type", "application/json");
-								results.innerHTML = '';
+							data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
 
-								data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
+							xhr.onreadystatechange = function () {
 
-								xhr.onreadystatechange = function () {
+								if (xhr.readyState === 4 && xhr.status === 200) {
+									jsonResponse = JSON.parse(xhr.responseText);
+									console.log("URL obtained:" + jsonResponse["url"]);
+									$.ajax({
+										url: jsonResponse["url"],    //Your api url
+										type: 'DELETE',   //type is any HTTP method
+										data: dir,
+										success: function () {
+											results.innerHTML = file+" deleted!"
+										}
+									});
+								}
+								else if(xhr.status!=200) {
+									results.innerHTML = 'ERROR!';
+								}
+							};
+							xhr.send(data);
 
-									if (xhr.readyState === 4 && xhr.status === 200) {
-										console.log("Delete successful with status code: " + xhr.status);
-										results.innerHTML = 'DELETED!';
-									}
-									else if(xhr.status!=200) {
-										results.innerHTML = 'ERROR!';
-									}
-								};
-								xhr.send(data);
 						});
 					});
 				});
