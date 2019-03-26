@@ -83,51 +83,29 @@
 				//create folder
 				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
 				if(isMacLike){
-            dir = require('os').homedir()+"/deadlinefighters/";
-            if(!fs.existsSync(dir)){
-              fs.mkdir(dir,function(err){
+						dir = require('os').homedir()+"/deadlinefighters/";
+						if(!fs.existsSync(dir)){
+						  fs.mkdir(dir,function(err){
 
-                 if (err) {
-                   return console.error(err);
-                 }
-                 console.log("folder created successfully.");
-              });
-            }
+							 if (err) {
+							   return console.error(err);
+							 }
+							 console.log("folder created successfully.");
+						  });
 					}
-					else{
-						dir = "D:\\deadlinefighters\\";
-						if(!fs.existsSync(dir)){		
-							fs.mkdir(dir,function(err){
-
-							   if (err) {
-								   return console.error(err);
-							   }
-							   console.log("folder created successfully.");
-							});
-						}
-					}
-
-					xhr.open("POST", url, true);
-
-						xhr.setRequestHeader("Content-Type", "application/json");
-						results.innerHTML = '';
-
-						data = JSON.stringify({"operation": "syncAll", "bucketName": "deadlinefighters", "fileDetails": {"fileName": "All"}});
-
-						xhr.onreadystatechange = function () {
-
-							if (xhr.readyState === 4 && xhr.status === 200) {
-								console.log("SyncAll successful with status code: " + xhr.status);
-								results.innerHTML = 'SYNCED!';
-							}
-							else if(xhr.status!=200) {
-								results.innerHTML = 'ERROR!';
-							}
-						};
-						xhr.send(data); 
 				}
+				else{
+					dir = "D:\\deadlinefighters\\";
+					if(!fs.existsSync(dir)){		
+						fs.mkdir(dir,function(err){
 
-				window.onload = onLoadFunctions;
+						   if (err) {
+							   return console.error(err);
+						   }
+						   console.log("folder created successfully.");
+						});
+					}
+				}
 
 				//Generic function for AWS Calls: Not used right now. Code to be refactored to remove redundancy
 
@@ -170,7 +148,6 @@
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4 && xhr.status === 200) {
 								jsonResponse = JSON.parse(xhr.responseText);
-								console.log("URL obtained:" + jsonResponse["url"]);
 								$.ajax({
 									url: jsonResponse["url"],    //Your api url
 									type: 'PUT',   //type is any HTTP method
@@ -388,26 +365,33 @@
 				  
 						$(deletebtn).click(function(){
 
-								console.log("Entered deletebtn");
+							xhr.open("POST", url, true);
 
-								xhr.open("POST", url, true);
+							xhr.setRequestHeader("Content-Type", "application/json");
+							results.innerHTML = '';
 
-								xhr.setRequestHeader("Content-Type", "application/json");
-								results.innerHTML = '';
+							data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
 
-								data = JSON.stringify({"operation": "deleteFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file}});
+							xhr.onreadystatechange = function () {
 
-								xhr.onreadystatechange = function () {
+								if (xhr.readyState === 4 && xhr.status === 200) {
+									jsonResponse = JSON.parse(xhr.responseText);
+									console.log("URL obtained:" + jsonResponse["url"]);
+									$.ajax({
+										url: jsonResponse["url"],    //Your api url
+										type: 'DELETE',   //type is any HTTP method
+										data: dir,
+										success: function () {
+											results.innerHTML = file+" deleted!"
+										}
+									});
+								}
+								else if(xhr.status!=200) {
+									results.innerHTML = 'ERROR!';
+								}
+							};
+							xhr.send(data);
 
-									if (xhr.readyState === 4 && xhr.status === 200) {
-										console.log("Delete successful with status code: " + xhr.status);
-										results.innerHTML = 'DELETED!';
-									}
-									else if(xhr.status!=200) {
-										results.innerHTML = 'ERROR!';
-									}
-								};
-								xhr.send(data);
 						});
 					});
 				});
