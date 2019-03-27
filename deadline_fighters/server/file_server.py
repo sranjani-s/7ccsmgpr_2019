@@ -68,12 +68,13 @@ def download_All():
 		log("Call for download_All")
 		objectListDict = s3.list_objects(Bucket = bucketName)
 		finalDownloadAllJson = []
-		for objects in objectListDict['Contents']:
-			itemJson = dict()
-			itemJson['fileName'] = objects['Key']
-			urlJson = download_file(objects['Key'])
-			itemJson['url'] = json.loads(urlJson)['url']
-			finalDownloadAllJson.append(itemJson)
+		if 'Contents' in objectListDict:
+			for objects in objectListDict['Contents']:
+				itemJson = dict()
+				itemJson['fileName'] = objects['Key']
+				urlJson = download_file(objects['Key'])
+				itemJson['url'] = json.loads(urlJson)['url']
+				finalDownloadAllJson.append(itemJson)
 		return json.dumps({'downloadAll':finalDownloadAllJson})
 
 def upload_All():
@@ -101,6 +102,7 @@ def sync_All(fileName):
 def list_All(fileName):
 		log("Call for list_All")
 		objectListDict = s3.list_objects(Bucket = bucketName)
+		log(objectListDict)
 		finalListAllJson = []
 		if 'Contents' in objectListDict:
 			for objects in objectListDict['Contents']:

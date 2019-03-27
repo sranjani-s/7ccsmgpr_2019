@@ -44,7 +44,6 @@
 				const httpreq = require('httpreq');
 				const os = require('os');
 				const chokidar = require('chokidar');
-				const FormData = require('form-data');
 			
 				/* Create folder for sync and log */
 				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
@@ -107,18 +106,6 @@
 					}
 				}
 
-
-				function loadDoc(filepath) {
-					var xhttp = new XMLHttpRequest();
-					xhttp.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-							return this.responseText;
-						}
-					};
-					xhttp.open("GET", filepath, true);
-					xhttp.send();
-				}
-
 				/* HTTP calls to Python server */
 				function listObjectsinServer(){
 					console.log("listObjectsinServer called");
@@ -134,6 +121,7 @@
 							if (xhr.readyState === 4 && xhr.status === 200) {
 								$('#objectList').empty();
 								jsonResponse = JSON.parse(xhr.responseText);
+								if(!jQuery.isEmptyObject(jsonResponse)){
 									listAllJson = jsonResponse['listAll'];
 									for(var i = 0; i<listAllJson.length;i++) {
 										var obj = listAllJson[i];
@@ -142,6 +130,7 @@
 										}
 									}
 								}
+							}
 							return;
 					};
 					xhr.send(data);
@@ -170,9 +159,15 @@
 
 								var xhrUpload = new XMLHttpRequest ();
 								xhrUpload.open("PUT", jsonResponse["url"], true);
-								xhrUpload.send(fs.readFileSync(dir));
 
-								listObjectsinServer();
+								xhrUpload.onreadystatechange = function () {
+									if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
+										console.log("Upload successful for "+dir);
+										listObjectsinServer();
+									}
+								};
+
+								xhrUpload.send(fs.readFileSync(dir));
 							}
 							else if(xhr.status!=200) {
 								results.innerHTML = 'ERROR!';
@@ -199,9 +194,15 @@
 
 								var xhrUpload = new XMLHttpRequest ();
 								xhrUpload.open("PUT", jsonResponse["url"], true);
+
+								xhrUpload.onreadystatechange = function () {
+									if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
+										console.log("Upload successful for "+dir);
+										listObjectsinServer();
+									}
+								};
+
 								xhrUpload.send(fs.readFileSync(dir));
-								 
-								listObjectsinServer();
 							}
 							else if(xhr.status!=200) {
 								results.innerHTML = 'ERROR!';
@@ -228,7 +229,7 @@
 									type: 'DELETE',   //type is any HTTP method
 									data: dir,
 									success: function () {
-										results.innerHTML = dir+" deleted!"
+										results.innerHTML = dir.replace(/^.*[\\\/]/, '')+" deleted!"
 									}
 								});
 								listObjectsinServer();
@@ -256,7 +257,7 @@
 					//sync: pull before push
 					$(sync).click(function(){
 
-						console.log("Entered syncbtn");
+						console.log("SyncAll triggered");
 
 						xhr.open("POST", url, true);
 
@@ -269,10 +270,16 @@
 
 							if (xhr.readyState === 4 && xhr.status === 200) {
 								jsonResponse = JSON.parse(xhr.responseText);
-								syncAllJson = jsonResponse['syncAll'];
-								for(i in syncAllJson['downloadAll']) {
-									var obj = syncAllJson.downloadAll[i];
-									httpreq.download(obj.url, dir+obj.fileName, obj.fileName, function (err, progress){
+								syncAllJsonObject = jsonResponse['syncAll'];
+
+								downloadAllJsonObject = JSON.parse(syncAllJsonObject[0]);
+								uploadAllJsonObject = JSON.parse(syncAllJsonObject[1]);
+
+								console.log("Entering DownloadAll");
+
+								for(i in downloadAllJsonObject['downloadAll']) {
+									var obj = downloadAllJsonObject['downloadAll'][i];
+									httpreq.download(obj.url, syncDir+obj.fileName, obj.fileName, function (err, progress){
 										if (err) 
 											return console.log(err);
 										console.log(progress);
@@ -284,25 +291,23 @@
 									});
 								}
 
-								for(i in syncAllJson.uploadAll) {
-									var obj = syncAllJson.uploadAll[i];
-									fs.readFile(obj[obj.fileName], 'utf8', function(err, fileData) {  
-										if (err) 
-											throw err;
-										$.ajax({
-											url: obj.url,    //Your api url
-											type: 'PUT',   //type is any HTTP method
-											data: fileData,
-											async:false,
-											retryLimit: 3,
-											success: function () {
-												results.innerHTML = obj.fileName+" uploaded!";
-											},
-											error: function(){
-												results.innerHTML = obj.fileName+" upload failed";
-											}
-										});
-									});
+								console.log("Entering UploadAll");
+
+								for(i in uploadAllJsonObject['uploadAll']) {
+
+									var obj = uploadAllJsonObject['uploadAll'][i];
+
+									var xhrUpload = new XMLHttpRequest ();
+									xhrUpload.open("PUT", obj.url, true);
+
+									xhrUpload.onreadystatechange = function () {
+										if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
+											console.log("Upload successful for "+obj.fileName);
+											listObjectsinServer();
+										}
+									};
+
+									xhrUpload.send(fs.readFileSync(syncDir+obj.fileName));
 								}	
 							}
 							else if(xhr.status!=200) {
@@ -377,7 +382,7 @@
 										type: 'DELETE',   //type is any HTTP method
 										data: syncDir,
 										success: function () {
-											results.innerHTML = file+" deleted!"
+											results.innerHTML = file.replace(/^.*[\\\/]/, '')+" deleted!"
 										}
 									});
 									listObjectsinServer();
