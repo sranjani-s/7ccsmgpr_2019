@@ -1,12 +1,16 @@
 package com.example.lenovo.filesync;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
+import android.app.DownloadManager;
 import android.content.ContentUris;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.FileObserver;
+import android.os.Looper;
 import android.provider.DocumentsContract;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,6 +38,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.amazonaws.AmazonServiceException;
+import com.amazonaws.http.HttpClient;
 import com.amazonaws.mobile.client.AWSMobileClient;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.mobileconnectors.s3.transferutility.*;
@@ -45,23 +50,44 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.model.*;
 
 import com.amazonaws.util.IOUtils;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.HttpResponse;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.Socket;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 
 import android.database.sqlite.*;
+
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -69,37 +95,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private final String SECRET = "xxx";
     private final String bucketName = "xxx";
     private final String filepath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "FileSync";
+    private final String folder = "FileSync";
 
     private AmazonS3Client s3Client;
     private BasicAWSCredentials credentials;
 
     private static final int CHOOSING_FILE_REQUEST = 1234;
+    private String address = "10.40.176.129";//static IP for Siva's machine
+    private int port = 80;
 
     private TextView tvFileName;
-    private EditText edtFileName;
     private ListView lvItemList;
     private TextView tvFileInfo;
 
     private Uri fileUri;
-    private DirectoryFileObserver directoryFileObserver;
+    private MainFileObserver mainFileObserver;
 
+    String URL ="http://10.40.176.129:80";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        edtFileName = findViewById(R.id.edt_file_name);
         tvFileName = findViewById(R.id.tv_file_name);
         tvFileName.setText("");
 
         lvItemList = findViewById(R.id.lv_item_list);
         tvFileInfo = findViewById(R.id.tv_file_info);
-        tvFileInfo.setText("No file selected.");
+        tvFileInfo.setText("");
 
-        findViewById(R.id.btn_choose_file).setOnClickListener(this);
-        findViewById(R.id.btn_upload).setOnClickListener(this);
-        findViewById(R.id.btn_download).setOnClickListener(this);
+        findViewById(R.id.btn_add_file).setOnClickListener(this);
+        findViewById(R.id.btn_sync).setOnClickListener(this);
         findViewById(R.id.btn_server_files).setOnClickListener(this);
         findViewById(R.id.btn_local_file).setOnClickListener(this);
 
@@ -112,10 +139,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         credentials = new BasicAWSCredentials(KEY, SECRET);
         s3Client = new AmazonS3Client(credentials);
+//        try {
+//            Socket socket = new Socket(address,port);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
 
-        directoryFileObserver = new DirectoryFileObserver(filepath);
-        directoryFileObserver.startWatching();
+        if(isPathExist(filepath)){
+            mainFileObserver = new MainFileObserver(filepath);
+            mainFileObserver.startWatching();
+        }
 
+
+    }
+
+    public void connectHttp(){
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+// Request a string response from the provided URL.
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, URL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Display the first 500 characters of the response string.
+                        Toast.makeText(getApplicationContext(), "Response is: "+ response.substring(0,500), Toast.LENGTH_SHORT).show();
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                tvFileInfo.setText("That didn't work!");
+            }
+        });
+
+// Add the request to the RequestQueue.
+        queue.add(stringRequest);
     }
 
     public void openDialog(){
@@ -127,104 +184,78 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         dialog.show();
 
         TextView tvFileSelect = dialogView.findViewById(R.id.tv_file_select);
-        Button btnUploadFile = dialogView.findViewById(R.id.btn_upload_file);
-        Button btnDownloadFile = dialogView.findViewById(R.id.btn_download_file);
+        Button btnSyncFile = dialogView.findViewById(R.id.btn_sync_file);
         Button btnDeleteFile = dialogView.findViewById(R.id.btn_delete_file);
-        Button btnRenameFile = dialogView.findViewById(R.id.btn_rename_file);
 
-        tvFileSelect.setText(tvFileInfo.getText().toString());
+        String fileName = tvFileInfo.getText().toString();
+        tvFileSelect.setText(fileName);
+        File file = new File(filepath, "/" + fileName);
 
-        btnUploadFile.setOnClickListener(new View.OnClickListener() {
+        btnSyncFile.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { uploadFile(); }
-        });
+            public void onClick(View view) {
+                if (!file.exists()){
+                    downloadFile();
+                }else if (s3Client.getObject(bucketName,fileName) == null){
+                    uploadFile();
+                }else {
 
-        btnDownloadFile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {downloadFile(); }
+                }
+            }
         });
 
         btnDeleteFile.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) { deleteFile(); }
+            public void onClick(View view) {
+                if (!file.exists()){
+                    deleteFile();
+                } else{
+                    deleteLocalFile();
+                }
+
+            }
         });
-        btnRenameFile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) { renameFile(tvFileInfo.getText().toString(),edtFileName.getText().toString()); }
-        });
+
     }
 
     private void uploadFile() {
-        final String fileNameTv = tvFileInfo.getText().toString();
-        TransferObserver uploadObserver;
-        File file;
-        if(fileNameTv != null){
+        final String fileName = tvFileInfo.getText().toString();
+        File file = new File(filepath, "/" + fileName);
 
-            if (fileUri != null) {
+        TransferUtility transferUtility =
+                TransferUtility.builder()
+                        .context(getApplicationContext())
+                        .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+                        .s3Client(s3Client)
+                        .build();
 
-                final String fileNameEdt = edtFileName.getText().toString();
+        TransferObserver uploadObserver = transferUtility.upload(fileName, file);
 
-                if (!validateInputFileName(fileNameEdt)) {
-                    return;
+        uploadObserver.setTransferListener(new TransferListener() {
+
+            @Override
+            public void onStateChanged(int id, TransferState state) {
+                if (TransferState.COMPLETED == state) {
+                    Toast.makeText(getApplicationContext(), "Upload Completed!", Toast.LENGTH_SHORT).show();
+                } else if (TransferState.FAILED == state) {
+                    Toast.makeText(getApplicationContext(), "Upload Failed!", Toast.LENGTH_SHORT).show();
                 }
-
-                file = new File(filepath, "/" + fileNameEdt+ "." + getFileExtension(fileUri));
-
-                createFile(getApplicationContext(), fileUri, file);
-
-                TransferUtility transferUtility =
-                        TransferUtility.builder()
-                                .context(getApplicationContext())
-                                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-                                .s3Client(s3Client)
-                                .build();
-
-                uploadObserver = transferUtility.upload(fileNameEdt + "." + getFileExtension(fileUri), file);
-
-                fileUri = null;
-            }else{
-                file = new File(filepath, "/" + fileNameTv);
-
-                TransferUtility transferUtility =
-                        TransferUtility.builder()
-                                .context(getApplicationContext())
-                                .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-                                .s3Client(s3Client)
-                                .build();
-
-                uploadObserver = transferUtility.upload(fileNameTv, file);
-
-
             }
-            uploadObserver.setTransferListener(new TransferListener() {
 
-                @Override
-                public void onStateChanged(int id, TransferState state) {
-                    if (TransferState.COMPLETED == state) {
-                        Toast.makeText(getApplicationContext(), "Upload Completed!", Toast.LENGTH_SHORT).show();
+            @Override
+            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+                float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
+                int percentDone = (int) percentDonef;
 
+                tvFileName.setText("ID:" + id + "|bytesCurrent: " + bytesCurrent + "|bytesTotal: " + bytesTotal + "|" + percentDone + "%");
+            }
 
-                    } else if (TransferState.FAILED == state) {
-                        Toast.makeText(getApplicationContext(), "Upload Failed!", Toast.LENGTH_SHORT).show();
-                        file.delete();
-                    }
-                }
+            @Override
+            public void onError(int id, Exception ex) {
+                ex.printStackTrace();
+            }
 
-                @Override
-                public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-                    float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
-                    int percentDone = (int) percentDonef;
-
-                    tvFileName.setText("ID:" + id + "|bytesCurrent: " + bytesCurrent + "|bytesTotal: " + bytesTotal + "|" + percentDone + "%");
-                }
-
-                @Override
-                public void onError(int id, Exception ex) {
-                    ex.printStackTrace();
-                }
-
-            });
-        }
+        });
 
     }
 
@@ -239,37 +270,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    public void renameFile(final String fileNameTv, final String fileNameEdt){
-
-        if (!validateInputFileName(fileNameEdt)){
-            return;
-        }
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String ex = getFileExtension(fileNameTv);
-                String fileName = getFileNameNoEx(fileNameTv);
-                if (fileName != fileNameEdt){
-                    try {
-                        s3Client.copyObject(bucketName, fileNameTv, bucketName, fileNameEdt + "." + ex);
-                        s3Client.deleteObject(bucketName,fileNameTv);
-                        renameLocalFile(fileNameTv,fileNameEdt);
-                    } catch (AmazonServiceException e) {
-                        System.err.println(e.getErrorMessage());
-                        System.exit(1);
-                    }
-                }
-            }
-        }).start();
-
-    }
-
-    private void renameLocalFile(final String fileNameTv, final String fileNameEdt){
-
-        final File file = new File(filepath, "/" + fileNameEdt+ "." + getFileExtension(fileUri));
-
-        createFile(getApplicationContext(), fileUri, file);
-        deleteLocalFile();
+    private void syncFiles(){
+        uploadFiles();
+        downloadFiles();
     }
 
     private void listServerFile(){
@@ -371,57 +374,145 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return fileList;
     }
 
-    private void downloadFile() {
-        if (isPathExist(filepath)) {
+    protected void sendDownloadRequest() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String fileName = tvFileInfo.getText().toString();
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("operation","downloadFile");
+                    json.put("bucketName","deadlinefighters");
+                    json.put("fileDetails",fileName);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
-        final String fileName = tvFileInfo.getText().toString();
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, json,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
 
+                                try {
+                                    if (response!=null) {
 
-            //                final File localFile = File.createTempFile("tmp","."+getFileExtension(fileName));
-            final File localFile = new File(filepath, "/" + fileName);
+                                        String url = response.getString("url");
+                                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
+                                                .setDestinationInExternalPublicDir(folder,fileName)
+                                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
-            Log.d("downloadFile", "Get file path: " + localFile.getAbsolutePath());
+                                        request.allowScanningByMediaScanner();
 
-            TransferUtility transferUtility =
-                    TransferUtility.builder()
-                            .context(getApplicationContext())
-                            .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-                            .s3Client(s3Client)
-                            .build();
-
-            TransferObserver downloadObserver =
-                    transferUtility.download(fileName,localFile);
-
-            downloadObserver.setTransferListener(new TransferListener() {
-
-                @Override
-                public void onStateChanged(int id, TransferState state) {
-                    if (TransferState.COMPLETED == state) {
-                        Toast.makeText(getApplicationContext(), "Download:" + fileName, Toast.LENGTH_SHORT).show();
-
-                        tvFileName.setText(fileName);
-                        Log.d("MainActivity", "Get file path: " + localFile.getAbsolutePath());
-
+                                        DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
+                                        manager.enqueue(request);
+                                        Toast.makeText(getApplicationContext(), "Download complete.", Toast.LENGTH_LONG).show();
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                Toast.makeText(getApplicationContext(), "String Response : "+ response.toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(),"Error getting response", Toast.LENGTH_SHORT).show();
                     }
-                }
+                });
+                jsonObjectRequest.setTag("request for download.");
+                queue.add(jsonObjectRequest);
+            }
+        }).start();
 
-                @Override
-                public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-                    float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
-                    int percentDone = (int) percentDonef;
 
-                    tvFileName.setText("ID:" + id + "|bytesCurrent: " + bytesCurrent + "|bytesTotal: " + bytesTotal + "|" + percentDone + "%");
-                }
+    }
 
-                @Override
-                public void onError(int id, Exception ex) {
-                    ex.printStackTrace();
-                }
+    protected void sendUploadRequest() {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                String fileName = tvFileInfo.getText().toString();
+//                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+//                JSONObject json = new JSONObject();
+//                try {
+//                    json.put("operation","uploadFile");
+//                    json.put("bucketName","deadlinefighters");
+//                    json.put("fileDetails",fileName); //file name or file path?
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+//
+//                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, json,
+//                        new Response.Listener<JSONObject>() {
+//                            @Override
+//                            public void onResponse(JSONObject response) {
+//                                Toast.makeText(getApplicationContext(), "String Response : "+ response.toString(), Toast.LENGTH_SHORT).show();
+//                            }
+//                        }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        Toast.makeText(getApplicationContext(),"Error getting response", Toast.LENGTH_SHORT).show();
+////                tvFileName.setText("Error getting response");
+//                    }
+//                });
+//                jsonObjectRequest.setTag("request for download.");
+//                queue.add(jsonObjectRequest);
+//            }
+//        }).start();
 
-            });
-        }else {
-            Toast.makeText(this, "File path is not exist.", Toast.LENGTH_LONG).show();
-        }
+
+    }
+
+    private void downloadFile() {
+
+//        if (isPathExist(filepath)) {
+//
+//        final String fileName = tvFileInfo.getText().toString();
+//
+//            final File localFile = new File(filepath, "/" + fileName);
+//
+//            Log.d("downloadFile", "Get file path: " + localFile.getAbsolutePath());
+//
+//            TransferUtility transferUtility =
+//                    TransferUtility.builder()
+//                            .context(getApplicationContext())
+//                            .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
+//                            .s3Client(s3Client)
+//                            .build();
+//
+//            TransferObserver downloadObserver =
+//                    transferUtility.download(fileName,localFile);
+//localFile
+//            downloadObserver.setTransferListener(new TransferListener() {
+//
+//                @Override
+//                public void onStateChanged(int id, TransferState state) {
+//                    if (TransferState.COMPLETED == state) {
+//                        Toast.makeText(getApplicationContext(), "Download:" + fileName, Toast.LENGTH_SHORT).show();
+//
+//                        tvFileName.setText(fileName);
+//                        Log.d("MainActivity", "Get file path: " + localFile.getAbsolutePath());
+//
+//                    }
+//                }
+//
+//                @Override
+//                public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
+//                    float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
+//                    int percentDone = (int) percentDonef;
+//
+//                    tvFileName.setText("ID:" + id + "|bytesCurrent: " + bytesCurrent + "|bytesTotal: " + bytesTotal + "|" + percentDone + "%");
+//                }
+//
+//                @Override
+//                public void onError(int id, Exception ex) {
+//                    ex.printStackTrace();
+//                }
+//
+//            });
+//        }else {
+//            Toast.makeText(this, "File path is not exist.", Toast.LENGTH_LONG).show();
+//        }
     }
 
     private void downloadFiles(){
@@ -453,7 +544,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 s3Client.deleteObject(bucketName,fileName);
             }
         }).start();
-        deleteLocalFile();
 
     }
 
@@ -503,12 +593,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View view) {
         int i = view.getId();
 
-        if (i == R.id.btn_choose_file) {
+        if (i == R.id.btn_add_file) {
             showChoosingFile();
-        } else if (i == R.id.btn_upload) {
-            uploadFile();
-        } else if (i == R.id.btn_download) {
-            downloadFiles();
+        }  else if (i == R.id.btn_sync) {
+//            sendUploadRequest();
+            sendDownloadRequest();
+//            connectHttp();
+//            downloadFile();
         } else if (i == R.id.btn_server_files){
             listServerFile();
         } else if (i == R.id.btn_local_file){
@@ -537,7 +628,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-
         if (requestCode == CHOOSING_FILE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
             fileUri = data.getData();
             Log.d("MainActivity", "Get file uri: " + fileUri);
@@ -547,58 +637,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Log.d("MainActivity", "Get File name: " + fileName);
                 if (fileName != null){
                     tvFileInfo.setText(fileName);
-                    fileName = getFileNameNoEx(fileName);
-                    edtFileName.setText(fileName);
+                    File file = new File(filepath, "/" + fileName);
+                    createFile(getApplicationContext(), fileUri, file);
+                    Toast.makeText(getApplicationContext(), "Add file Completed!", Toast.LENGTH_SHORT).show();
                 }else{
-                    Toast.makeText(getApplicationContext(), "Choose file failed!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "Add file failed!", Toast.LENGTH_SHORT).show();
                 }
 
-//                    final String fileName = edtFileName.getText().toString();
-
-                if (!validateInputFileName(edtFileName.getText().toString())) {
-                    return;
-                }
             }
 
         }
 
-    }
-
-    private String getFileExtension(Uri uri) {
-        ContentResolver contentResolver = getContentResolver();
-        MimeTypeMap mime = MimeTypeMap.getSingleton();
-
-        return mime.getExtensionFromMimeType(contentResolver.getType(uri));
-    }
-
-    private String getFileExtension(String filename){
-        if ((filename != null) && (filename.length() > 0)) {
-            int dot = filename.lastIndexOf('.');
-            if ((dot >-1) && (dot < (filename.length()))) {
-                return filename.substring(dot + 1);
-            }
-        }
-        return null;
-    }
-
-    private String getFileNameNoEx(String filename) {
-        if ((filename != null) && (filename.length() > 0)) {
-            int dot = filename.lastIndexOf('.');
-            if ((dot >-1) && (dot < (filename.length()))) {
-                return filename.substring(0, dot);
-            }
-        }
-        return filename;
-    }
-
-    private boolean validateInputFileName(String fileName) {
-
-        if (TextUtils.isEmpty(fileName)) {
-            Toast.makeText(this, "Enter file name!", Toast.LENGTH_SHORT).show();
-            return false;
-        }
-
-        return true;
     }
 
     private void createFile(Context context, Uri srcUri, File dstFile) {
@@ -736,6 +785,41 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             } while (objectListing.isTruncated());
         }
     }
+
+    public class MainFileObserver extends FileObserver{
+        String absolutePath;
+        static final String TAG ="FileObserver";
+
+        public MainFileObserver(String dir) {
+            super(dir,FileObserver.ALL_EVENTS);
+            absolutePath = dir;
+        }
+
+        @Override
+        public void onEvent(int event, String path) {
+            Log.d(TAG, "Entering FileWatcher for "+path);
+            switch (event){
+                case FileObserver.MODIFY:
+                    Log.d(TAG, "MODIFY:"  + absolutePath +"/" + path);
+                    if (!s3Client.doesObjectExist(bucketName, path)){
+                        uploadFile();
+                    }
+                    break;
+                case FileObserver.CREATE:
+                    Log.d(TAG, "CREATE:"  + absolutePath +"/" + path);
+                    if (!s3Client.doesObjectExist(bucketName, path)){
+                        uploadFile();
+                    }
+                    break;
+                case FileObserver.DELETE:
+                    Log.d(TAG, "DELETE:"  + absolutePath +"/" + path);
+                    deleteFile();
+                    break;
+            }
+        }
+    }
+
+
 
     }
 
