@@ -12,6 +12,8 @@
 		<br>
 
 		<button id="sync-button">Sync</button>
+		<button id="download-special" hidden=true>Download</button>
+        <button id="delete-special" hidden=true>Delete</button>
 
 		<br>
 
@@ -23,7 +25,7 @@
 				/* Global variables */
 
 				var xhr = new XMLHttpRequest();
-				var url = "http://10.40.238.245:80"; //static IP for machine running python server
+				var url = "http://10.40.174.215:80"; //static IP for machine running python server
 				var data;
 				var syncDir; // Sync directory
 				var logDir; // Log directory
@@ -38,6 +40,8 @@
 				var edit = document.getElementById('edit-button');
 				var sync = document.getElementById('sync-button');
 				var results = document.getElementById('results');
+				var downloadbtn = document.getElementById('download-special');
+				var deletebtn = document.getElementById('delete-special');
 
 				/* Required node modules */
 				const fs = require('fs');
@@ -320,10 +324,9 @@
 					//Select a file to download or delete
 					$('#objectList').on("click",'button',function(){
 						var i = $(this).attr('id');
-						var downloadbtn = $("<button id='download'></button>").text("download");
-						var deletebtn = $("<button id='delete'></button>").text("delete");
-						$(downloadbtn).dialog();
-						$(deletebtn).dialog();
+						$('#'+i).css('color', 'gray');
+						downloadbtn.hidden = false;
+                        deletebtn.hidden = false;
 
 						var file = $(this).val(); 
 
@@ -360,7 +363,10 @@
 										results.innerHTML = 'ERROR!';
 									}
 								};
-								xhr.send(data);
+						xhr.send(data);
+						$('#'+i).css('color', 'black');
+						downloadbtn.hidden = true;
+                        deletebtn.hidden = true;
 						});
 
 				  
@@ -391,8 +397,10 @@
 									results.innerHTML = 'ERROR!';
 								}
 							};
-							xhr.send(data);
-
+						xhr.send(data);
+						$('#'+i).css('color', 'black');
+						downloadbtn.hidden = true;
+                        deletebtn.hidden = true;
 						});
 					});
 		
