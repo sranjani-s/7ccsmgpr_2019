@@ -4,21 +4,41 @@
 		<title>Deadline Fighters File Synchroniser</title>
 		<script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
 		<script src="https://apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
 	</head>
-	<body onload = "listObjectsinServer()">
-
-		<ul id="objectList" ></ul>
-
-		<br>
-
-		<button id="sync-button">Sync</button>
-		<button id="download-special" hidden=true>Download</button>
-        <button id="delete-special" hidden=true>Delete</button>
-
-		<br>
-
-		<p id="results">
-		
+    <body onload = "listObjectsinServer()">
+    <br>
+      
+    <div class="container-fluid">
+    <div class="row" style="padding: 1px;">
+    <div class="col-md-8 col-md-offset-3"><h3> File Synchronize System</h3></div>
+    </div>
+    <hr SIZE=5>
+    <div class="row-fluid">
+        <div class="col-md-3" style='width:20%;float:left;height:700px;'> <h4></h4> 
+        <div class = "span3 offset2" style= "margin-top:25px;">
+        <div class="row demo-row" style= "margin-top:10px;"> <!-- /row -->
+        <button id="sync-button" type="button" style="width:120px;height:40px;font-size:18px;background-color:burlywood;border: none "><font color="white">Sync</font></button>    
+        </div>
+        <div class="row demo-row" style= "margin-top:10px;">   <!-- /row -->   
+        <button id="download-special" hidden=true type="button"  style="width:120px;height:40px;font-size:18px;background-color:burlywood;border: none "><font color="white">Download</font></button>
+        </div> 
+        <div class="row demo-row" style= "margin-top:10px;">   <!-- /row -->      
+        <button id="delete-special" hidden=true type="button" style="width:120px;height:40px;font-size:18px;background-color:burlywood;border: none "><font color="white">Delete</font></button>
+        </div>
+        <p id="results">
+        </div>     
+        </div>
+        <div style='width:1px;border:0.6px solid black;float:left;height:600px;'></div>
+        <div style='width:70%;float:left;height:700px;'> 
+        <div data-role="page" id= "main" >
+        <p></p > 
+        <ul  id="objectList" >
+        </ul>
+        </div>
+        </div>
+      </div>
+      <br>
 		
 			<script type="text/javascript">
 
