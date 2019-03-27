@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnSyncFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                sendUploadRequest();
             }
         });
 
@@ -206,10 +206,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         List<HashMap<String, Object>> fileList = new ArrayList<HashMap<String,Object>>();
         fileList = getLocalFiles(filepath);
 
-        for(int i=0; i<fileList.size(); ++i){
-            String fileName = fileList.get(i).get("fileName").toString();
-            tvFileInfo.setText(fileName);
-            uploadFile();
+        if(fileList!=null) {
+            for (int i = 0; i < fileList.size(); ++i) {
+                String fileName = fileList.get(i).get("fileName").toString();
+                tvFileInfo.setText(fileName);
+                uploadFile();
+            }
         }
     }
 
@@ -332,27 +334,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         List<HashMap<String, Object>> fileList = new ArrayList<HashMap<String,Object>>();
         fileList = getLocalFiles(filepath);
 
-        SimpleAdapter simpleAdapter = new SimpleAdapter(
-                this,
-                fileList,
-                R.layout.spec_item_list,
-                new String[]{"seq","fileName"},
-                new int[]{R.id.tv_item_seq, R.id.tv_item_name}
-        );
-        lvItemList.setAdapter(simpleAdapter);
-        setListViewHeightBasedOnChildren(lvItemList);
+        if(fileList!=null) {
+            SimpleAdapter simpleAdapter = new SimpleAdapter(
+                    this,
+                    fileList,
+                    R.layout.spec_item_list,
+                    new String[]{"seq", "fileName"},
+                    new int[]{R.id.tv_item_seq, R.id.tv_item_name}
+            );
+            lvItemList.setAdapter(simpleAdapter);
+            setListViewHeightBasedOnChildren(lvItemList);
 
 
-        final List<HashMap<String, Object>> finalFileList = fileList;
-        lvItemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final String fileName = finalFileList.get(i).get("fileName").toString();
-                System.out.println(finalFileList.get(i));
-                tvFileInfo.setText(fileName);
-                openDialog();
-            }
-        });
+            final List<HashMap<String, Object>> finalFileList = fileList;
+            lvItemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    final String fileName = finalFileList.get(i).get("fileName").toString();
+                    System.out.println(finalFileList.get(i));
+                    tvFileInfo.setText(fileName);
+                    openDialog();
+                }
+            });
+        }
     }
 
     /**
