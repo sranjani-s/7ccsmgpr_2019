@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html>
 	<head>
-		<title>AWS S3 File System</title>
-		<script src="https://sdk.amazonaws.com/js/aws-sdk-2.395.0.min.js"></script> 
+		<title>Deadline Fighters File Synchroniser</title>
 		<script src="https://code.jquery.com/jquery-2.0.3.min.js"></script>
 		<script src="https://apps.bdimg.com/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 	</head>
-	<body>
+	<body onload = "listObjectsinServer()">
 
 		<ul id="objectList" ></ul>
 
@@ -16,57 +15,21 @@
 
 		<br>
 
-		<input id="file-chooser" type="file"/>
-
-		<br>
-
-		<button id="upload-button">Upload</button>
-
 		<p id="results">
-			<p></p>
-		
-			<br>
-
-			<button id="download-button">Download</button>
-
-			<br>
-			
-			<button id="delete-button">Delete</button>
-			
-			<br>
-			
-			<button id="rename-button">Rename</button>
-			
-			<br>
-			
-			<input type="file" id="file" />
-			
-			<div id="box"></div>
-			
-			<button id="edit-button">Edit</button>
-			
-			<br>
 		
 		
 			<script type="text/javascript">
 
-				//AWS credentials
-				var credentials = {
-						accessKeyId: 'xxxx',//use individual accessKeyId
-						secretAccessKey: 'xxxx'//use individual secretAccessKey
-				};  
-
-				//set region
-				AWS.config.update(credentials);
-				AWS.config.region = 'eu-west-2';
+				/* Global variables */
 
 				var xhr = new XMLHttpRequest();
-				var url = "http://10.40.182.16:80"; //static IP for Siva's machine
-				var data,dir;
+				var url = "http://10.40.238.245:80"; //static IP for machine running python server
+				var data;
+				var syncDir; // Sync directory
+				var logDir; // Log directory
 				
 				
-				// create bucket instance
-				var bucket = new AWS.S3({params: {Bucket: 'deadlinefighters'}});//select which bucket to upload
+				/* HTML element variables */
 				var fileChooser = document.getElementById('file-chooser');
 				var upload = document.getElementById('upload-button');
 				var download = document.getElementById('download-button');
@@ -76,62 +39,106 @@
 				var sync = document.getElementById('sync-button');
 				var results = document.getElementById('results');
 
-				var fs = require('fs');
-				var httpreq = require('httpreq');
-				
+				/* Required node modules */
+				const fs = require('fs');
+				const httpreq = require('httpreq');
+				const os = require('os');
+				const chokidar = require('chokidar');
 			
-				//create folder
+				/* Create folder for sync and log */
 				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
 				if(isMacLike){
-						dir = require('os').homedir()+"/deadlinefighters/";
-						if(!fs.existsSync(dir)){
-						  fs.mkdir(dir,function(err){
+					syncDir = os.homedir()+"/deadlinefighters/";
+					logDir = os.homedir()+"/deadlineFightersLogs/";
+					if(!fs.existsSync(syncDir)){
+					  fs.mkdir(syndDdir,function(err){
 
-							 if (err) {
-							   return console.error(err);
-							 }
-							 console.log("folder created successfully.");
-						  });
+						 if (err) {
+						   return console.error(err);
+						 }
+						 console.log("Sync folder created successfully.");
+					  });
+					}
+					else{
+						console.log("Sync folder already present");
+					}
+
+					if(!fs.existsSync(logDir)){
+					  fs.mkdir(logDir,function(err){
+
+						 if (err) {
+						   return console.error(err);
+						 }
+						 console.log("Log folder created successfully.");
+					  });
+					}
+					else{
+						console.log("Log folder already present")
 					}
 				}
 				else{
-					dir = "D:\\deadlinefighters\\";
-					if(!fs.existsSync(dir)){		
-						fs.mkdir(dir,function(err){
+					syncDir = "D:\\deadlinefighters\\";
+					logDir = "D:\\deadlineFightersLogs\\"
+					if(!fs.existsSync(syncDir)){		
+						fs.mkdir(syncDir,function(err){
 
 						   if (err) {
 							   return console.error(err);
 						   }
-						   console.log("folder created successfully.");
+						   console.log("Sync folder created successfully.");
 						});
+					}
+					else{
+						console.log("Sync folder already present");
+					}
+
+					if(!fs.existsSync(logDir)){		
+						fs.mkdir(logDir,function(err){
+
+						   if (err) {
+							   return console.error(err);
+						   }
+						   console.log("Log folder created successfully.");
+						});
+					}
+					else{
+						console.log("Log folder already present")
 					}
 				}
 
-				//Generic function for AWS Calls: Not used right now. Code to be refactored to remove redundancy
-
-				function awsCall(operation,fileName){
+				/* HTTP calls to Python server */
+				function listObjectsinServer(){
+					console.log("listObjectsinServer called");
 					xhr.open("POST", url, true);
+
 					xhr.setRequestHeader("Content-Type", "application/json");
 					results.innerHTML = '';
 
-					data = JSON.stringify({"operation": operation, "bucketName": "deadlinefighters", "fileDetails": {"fileName": fileName}});
+					data = JSON.stringify({"operation": "listAll", "bucketName": "deadlinefighters", "fileDetails": {"fileName": "All"}});
 
 					xhr.onreadystatechange = function () {
-						if (xhr.readyState === 4 && xhr.status === 200) {
-							console.log("Status code of "+operation+" : " + xhr.status);
-							results.innerHTML = operation+' SUCCESS!';
-						}
-						else if(xhr.status!=200) {
-							results.innerHTML = 'ERROR!';
-						}
+
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								$('#objectList').empty();
+								jsonResponse = JSON.parse(xhr.responseText);
+								if(!jQuery.isEmptyObject(jsonResponse)){
+									listAllJson = jsonResponse['listAll'];
+									for(var i = 0; i<listAllJson.length;i++) {
+										var obj = listAllJson[i];
+										if(obj.hasOwnProperty('fileName')){
+											$('#objectList').append("<button  id="+i+" value= '"+obj.fileName+"'>"+obj.fileName+"</button><br>");
+										}
+									}
+								}
+							}
+							return;
 					};
 					xhr.send(data);
+					return; 
 				}
-
 				
-				//File Watcher
-				var chokidar = require('chokidar')
-				var watcher = chokidar.watch(dir, {
+				/* File Watcher */
+				var watcher = chokidar.watch(syncDir, {
 								  ignored: /[\/\\]\./,
 								  persistent: true
 							  });
@@ -143,19 +150,24 @@
 						xhr.setRequestHeader("Content-Type", "application/json");
 						results.innerHTML = '';
 
-						data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": dir.replace(/^.*[\\\/]/, '')}});
+						var fileName = dir.replace(/^.*[\\\/]/, '');
+						data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": fileName}});
 
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4 && xhr.status === 200) {
 								jsonResponse = JSON.parse(xhr.responseText);
-								$.ajax({
-									url: jsonResponse["url"],    //Your api url
-									type: 'PUT',   //type is any HTTP method
-									data: dir,
-									success: function () {
-										results.innerHTML = "Uploaded!"
+
+								var xhrUpload = new XMLHttpRequest ();
+								xhrUpload.open("PUT", jsonResponse["url"], true);
+
+								xhrUpload.onreadystatechange = function () {
+									if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
+										console.log("Upload successful for "+dir);
+										listObjectsinServer();
 									}
-								});
+								};
+
+								xhrUpload.send(fs.readFileSync(dir));
 							}
 							else if(xhr.status!=200) {
 								results.innerHTML = 'ERROR!';
@@ -168,7 +180,35 @@
 						console.log('Directory', dir, 'has been added');
 				  })
 				  .on('change', function(dir) {
-					   console.log('File', dir, 'has been changed');
+						console.log('File', dir, 'has been edited');
+						xhr.open("POST", url, true);
+						xhr.setRequestHeader("Content-Type", "application/json");
+						results.innerHTML = '';
+
+						var fileName = dir.replace(/^.*[\\\/]/, '');
+						data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": fileName}});
+
+						xhr.onreadystatechange = function () {
+							if (xhr.readyState === 4 && xhr.status === 200) {
+								jsonResponse = JSON.parse(xhr.responseText);
+
+								var xhrUpload = new XMLHttpRequest ();
+								xhrUpload.open("PUT", jsonResponse["url"], true);
+
+								xhrUpload.onreadystatechange = function () {
+									if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
+										console.log("Upload successful for "+dir);
+										listObjectsinServer();
+									}
+								};
+
+								xhrUpload.send(fs.readFileSync(dir));
+							}
+							else if(xhr.status!=200) {
+								results.innerHTML = 'ERROR!';
+							}
+						};
+						xhr.send(data);
 				  })
 				  .on('unlink', function(dir) {
 						console.log('File', dir, 'has been removed');
@@ -184,15 +224,15 @@
 
 							if (xhr.readyState === 4 && xhr.status === 200) {
 								jsonResponse = JSON.parse(xhr.responseText);
-								console.log("URL obtained:" + jsonResponse["url"]);
 								$.ajax({
 									url: jsonResponse["url"],    //Your api url
 									type: 'DELETE',   //type is any HTTP method
 									data: dir,
 									success: function () {
-										results.innerHTML = dir+" deleted!"
+										results.innerHTML = dir.replace(/^.*[\\\/]/, '')+" deleted!"
 									}
 								});
+								listObjectsinServer();
 							}
 							else if(xhr.status!=200) {
 								results.innerHTML = 'ERROR!';
@@ -211,61 +251,13 @@
 					   // This event should be triggered everytime something happens.
 					   console.log('Raw event info:', event, dir, details);
 				  }); 
-			
-
-				//Upload function
-				upload.addEventListener('click', function () {
-
-					var file = fileChooser.files[0];
-
-					if (file) {
-							xhr.open("POST", url, true);
-							xhr.setRequestHeader("Content-Type", "application/json");
-							results.innerHTML = '';
-
-							data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": file.name}});
-
-							xhr.onreadystatechange = function () {
-								if (xhr.readyState === 4 && xhr.status === 200) {
-									console.log("Status code of uploadFile: " + xhr.status);
-									results.innerHTML = 'UPLOADED';
-								}
-								else if(xhr.status!=200) {
-									results.innerHTML = 'ERROR!';
-								}
-							};
-							xhr.send(data);
-					} 
-					else {
-							results.innerHTML = 'Nothing to upload.';
-					}
-
-				}, false);
-						
-				
-				
-				//list all files on the server
-				bucket.listObjects({}, function(err, data) {
-
-					if (err) 
-					{
-						console.log(err, err.stack); 
-					}// an error occurred
-
-					$('#objectList').empty();   //empty the list
-					var objects = data.Contents;
-					  
-					$.each(objects, function(i, content) {
-						//list the file name to the page
-						$('#objectList').append("<button  id="+i+" value= '"+content.Key+"'>"+content.Key+"</button><br>");
-					}); 
 				
 			  
 			  
 					//sync: pull before push
 					$(sync).click(function(){
 
-						console.log("Entered syncbtn");
+						console.log("SyncAll triggered");
 
 						xhr.open("POST", url, true);
 
@@ -278,11 +270,16 @@
 
 							if (xhr.readyState === 4 && xhr.status === 200) {
 								jsonResponse = JSON.parse(xhr.responseText);
-								fileList = jsonResponse['downloadAll'];
-								for(var i = 0; i < fileList.length; i++) {
-									var obj = fileList[i];
-									
-									httpreq.download(obj.url, dir+obj.fileName, obj.fileName, function (err, progress){
+								syncAllJsonObject = jsonResponse['syncAll'];
+
+								downloadAllJsonObject = JSON.parse(syncAllJsonObject[0]);
+								uploadAllJsonObject = JSON.parse(syncAllJsonObject[1]);
+
+								console.log("Entering DownloadAll");
+
+								for(i in downloadAllJsonObject['downloadAll']) {
+									var obj = downloadAllJsonObject['downloadAll'][i];
+									httpreq.download(obj.url, syncDir+obj.fileName, obj.fileName, function (err, progress){
 										if (err) 
 											return console.log(err);
 										console.log(progress);
@@ -293,7 +290,25 @@
 										console.log(obj.fileName+" downloaded");
 									});
 								}
-								
+
+								console.log("Entering UploadAll");
+
+								for(i in uploadAllJsonObject['uploadAll']) {
+
+									var obj = uploadAllJsonObject['uploadAll'][i];
+
+									var xhrUpload = new XMLHttpRequest ();
+									xhrUpload.open("PUT", obj.url, true);
+
+									xhrUpload.onreadystatechange = function () {
+										if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
+											console.log("Upload successful for "+obj.fileName);
+											listObjectsinServer();
+										}
+									};
+
+									xhrUpload.send(fs.readFileSync(syncDir+obj.fileName));
+								}	
 							}
 							else if(xhr.status!=200) {
 								results.innerHTML = 'ERROR!';
@@ -301,9 +316,6 @@
 						};
 						xhr.send(data); 
 					});
-			  
-				
-			  
 			  
 					//Select a file to download or delete
 					$('#objectList').on("click",'button',function(){
@@ -313,21 +325,9 @@
 						$(downloadbtn).dialog();
 						$(deletebtn).dialog();
 
+						var file = $(this).val(); 
 
-						var fs = require('fs');	
-						var httpreq = require('httpreq');
-
-						var file = $(this).val();
-
-						console.log(file);  
-
-						var filePath = '/deadlinefighters'+'/' + file;
-
-						console.log(filePath); 
-
-						var bucket1 = 'deadlinefighters';
-						var aws_delete = new AWS.S3();
-
+						var filePath = '/deadlinefighters'+'/' + file; 
 
 						$(downloadbtn).click(function(){
 
@@ -344,7 +344,7 @@
 
 									if (xhr.readyState === 4 && xhr.status === 200) {
 										jsonResponse = JSON.parse(xhr.responseText);
-										httpreq.download(jsonResponse["url"], dir+file, file, function (err, progress){
+										httpreq.download(jsonResponse["url"], syncDir+file, file, function (err, progress){
 											if (err) 
 												return console.log(err);
 											console.log(progress);
@@ -354,6 +354,7 @@
 												return console.log(err);
 											console.log(res);
 										});
+										listObjectsinServer();
 									}
 									else if(xhr.status!=200) {
 										results.innerHTML = 'ERROR!';
@@ -376,15 +377,15 @@
 
 								if (xhr.readyState === 4 && xhr.status === 200) {
 									jsonResponse = JSON.parse(xhr.responseText);
-									console.log("URL obtained:" + jsonResponse["url"]);
 									$.ajax({
 										url: jsonResponse["url"],    //Your api url
 										type: 'DELETE',   //type is any HTTP method
-										data: dir,
+										data: syncDir,
 										success: function () {
-											results.innerHTML = file+" deleted!"
+											results.innerHTML = file.replace(/^.*[\\\/]/, '')+" deleted!"
 										}
 									});
+									listObjectsinServer();
 								}
 								else if(xhr.status!=200) {
 									results.innerHTML = 'ERROR!';
@@ -394,46 +395,7 @@
 
 						});
 					});
-				});
 		
-		
-
-				//rename - first copy second delete
-				var re_name = new AWS.S3();
-
-				rename.addEventListener('click', function(){
-					
-						var params3 = {
-							Bucket: 'deadlinefighters',
-							Key: 'Test1！.zip',
-						};
-					
-						var params4 = {
-							Bucket: 'deadlinefighters',
-							CopySource: '/deadlinefighters/Test1！.zip',
-							Key: '2！.zip',	
-						};
-
-						re_name.copyObject(params4, function (err, data) {
-							if (err){
-
-								console.log(err, err.stack);
-							}
-							else { 
-
-								console.log(data); 
-						   
-								re_name.deleteObject(params3, function (err, data) {
-									if(err){
-										return console.log(err);
-									}
-									else {
-										console.log("rename sucessfully");
-									}
-								});		
-							}
-						});	
-				});	
 			</script>	
 	</body>
 </html>
