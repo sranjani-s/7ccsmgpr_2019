@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                             JSONObject json_data = fileList.getJSONObject(i);
                                             Log.d("ListAll","File:"+String.valueOf(json_data.getString("fileName"))+"is processed");
                                             String fileName=json_data.getString("fileName");
-                                            hashMap.put("seq",i);
+                                            hashMap.put("seq",i+1);
                                             hashMap.put("fileName",fileName);
                                             fileMapList.add(hashMap);
                                         }
