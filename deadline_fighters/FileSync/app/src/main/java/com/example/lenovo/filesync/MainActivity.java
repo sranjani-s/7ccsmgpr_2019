@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -37,19 +38,6 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.amazonaws.AmazonServiceException;
-import com.amazonaws.http.HttpClient;
-import com.amazonaws.mobile.client.AWSMobileClient;
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.mobileconnectors.s3.transferutility.*;
-import com.amazonaws.mobile.client.AWSStartupHandler;
-import com.amazonaws.mobile.client.AWSStartupResult;
-
-import com.amazonaws.auth.BasicAWSCredentials;
-
-import com.amazonaws.services.s3.model.*;
-
-import com.amazonaws.util.IOUtils;
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -58,18 +46,25 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.HttpResponse;
+import com.android.volley.toolbox.JsonRequest;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.Socket;
+import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -88,17 +83,16 @@ import org.apache.http.params.HttpParams;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
+import org.json.JSONArray;
+
+
+
 
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
-    private final String KEY = "xxx";
-    private final String SECRET = "xxx";
-    private final String bucketName = "xxx";
+    private final String bucketName = "deadlinefighters";
     private final String filepath = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "FileSync";
     private final String folder = "FileSync";
-
-    private AmazonS3Client s3Client;
-    private BasicAWSCredentials credentials;
 
     private static final int CHOOSING_FILE_REQUEST = 1234;
     private String address = "10.40.176.129";//static IP for Siva's machine
@@ -110,6 +104,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Uri fileUri;
     private MainFileObserver mainFileObserver;
+
 
     String URL ="http://10.40.176.129:80";
 
@@ -130,15 +125,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btn_server_files).setOnClickListener(this);
         findViewById(R.id.btn_local_file).setOnClickListener(this);
 
-        AWSMobileClient.getInstance().initialize(this, new AWSStartupHandler() {
-            @Override
-            public void onComplete(AWSStartupResult awsStartupResult) {
-                Log.d("MainActivity", "AWSMobileClient is instantiated and you are connected to AWS!");
-            }
-        }).execute();
-
-        credentials = new BasicAWSCredentials(KEY, SECRET);
-        s3Client = new AmazonS3Client(credentials);
 //        try {
 //            Socket socket = new Socket(address,port);
 //        } catch (IOException e) {
@@ -194,13 +180,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnSyncFile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!file.exists()){
-                    downloadFile();
-                }else if (s3Client.getObject(bucketName,fileName) == null){
-                    uploadFile();
-                }else {
-
-                }
+                sendUploadRequest();
             }
         });
 
@@ -208,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View view) {
                 if (!file.exists()){
-                    deleteFile();
+                    sendDeleteRequest();
                 } else{
                     deleteLocalFile();
                 }
@@ -219,43 +199,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void uploadFile() {
-        final String fileName = tvFileInfo.getText().toString();
-        File file = new File(filepath, "/" + fileName);
 
-        TransferUtility transferUtility =
-                TransferUtility.builder()
-                        .context(getApplicationContext())
-                        .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-                        .s3Client(s3Client)
-                        .build();
-
-        TransferObserver uploadObserver = transferUtility.upload(fileName, file);
-
-        uploadObserver.setTransferListener(new TransferListener() {
-
-            @Override
-            public void onStateChanged(int id, TransferState state) {
-                if (TransferState.COMPLETED == state) {
-                    Toast.makeText(getApplicationContext(), "Upload Completed!", Toast.LENGTH_SHORT).show();
-                } else if (TransferState.FAILED == state) {
-                    Toast.makeText(getApplicationContext(), "Upload Failed!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-                float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
-                int percentDone = (int) percentDonef;
-
-                tvFileName.setText("ID:" + id + "|bytesCurrent: " + bytesCurrent + "|bytesTotal: " + bytesTotal + "|" + percentDone + "%");
-            }
-
-            @Override
-            public void onError(int id, Exception ex) {
-                ex.printStackTrace();
-            }
-
-        });
 
     }
 
@@ -263,10 +207,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         List<HashMap<String, Object>> fileList = new ArrayList<HashMap<String,Object>>();
         fileList = getLocalFiles(filepath);
 
-        for(int i=0; i<fileList.size(); ++i){
-            String fileName = fileList.get(i).get("fileName").toString();
-            tvFileInfo.setText(fileName);
-            uploadFile();
+        if(fileList!=null) {
+            for (int i = 0; i < fileList.size(); ++i) {
+                String fileName = fileList.get(i).get("fileName").toString();
+                tvFileInfo.setText(fileName);
+                uploadFile();
+            }
         }
     }
 
@@ -276,6 +222,89 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void listServerFile(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String fileName = tvFileInfo.getText().toString();
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("operation","listAll");
+                    json.put("bucketName","deadlinefighters");
+                    json.put("fileDetails",fileName);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, json,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                if(response.has("listAll")) {
+                                    Log.d("ListAll","ListAll obtained");
+                                    try {
+                                        JSONArray fileList = (JSONArray) response.get("listAll");
+                                        Log.d("ListAll","ListAll is valid");
+
+                                        List<HashMap<String, Object>> fileMapList = new ArrayList<HashMap<String, Object>>();
+
+
+                                        for(int i=0; i < fileList.length() ; i++) {
+                                            HashMap<String, Object> hashMap = new HashMap<String, Object>();
+                                            JSONObject json_data = fileList.getJSONObject(i);
+                                            Log.d("ListAll","File:"+String.valueOf(json_data.getString("fileName"))+"is processed");
+                                            String fileName=json_data.getString("fileName");
+                                            hashMap.put("seq",i+1);
+                                            hashMap.put("fileName",fileName);
+                                            fileMapList.add(hashMap);
+                                        }
+
+                                        SimpleAdapter simpleAdapter = new SimpleAdapter(
+                                                getApplicationContext(),
+                                                fileMapList,
+                                                R.layout.spec_item_list,
+                                                new String[]{"seq","fileName"},
+                                                new int[]{R.id.tv_item_seq, R.id.tv_item_name}
+                                        );
+                                        lvItemList.setAdapter(simpleAdapter);
+                                        setListViewHeightBasedOnChildren(lvItemList);
+
+                                        final List<HashMap<String, Object>> finalFileList = fileMapList;
+                                        lvItemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                            @Override
+                                            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                                                final String fileName = finalFileList.get(i).get("fileName").toString();
+                                                System.out.println(finalFileList.get(i));
+                                                tvFileInfo.setText(fileName);
+                                                openDialog();
+                                            }
+                                        });
+
+
+                                    } catch (Exception e) {
+                                        Toast.makeText(getApplicationContext(),"Invalid list obtained", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                                else {
+                                    Toast.makeText(getApplicationContext(),"No file in server", Toast.LENGTH_SHORT).show();
+                                }
+
+                            }
+
+
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                // TODO: Handle error
+
+                            }
+                        }
+                );
+                queue.add(jsonObjectRequest);
+            }
+        }).start();
+
+        /*
         List<HashMap<String, Object>> fileList = new ArrayList<HashMap<String,Object>>();
         fileList = getFile();
 
@@ -299,34 +328,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 tvFileInfo.setText(fileName);
                 openDialog();
             }
-        });
+        }); */
     }
 
     private void listLocalFile(){
         List<HashMap<String, Object>> fileList = new ArrayList<HashMap<String,Object>>();
         fileList = getLocalFiles(filepath);
 
-        SimpleAdapter simpleAdapter = new SimpleAdapter(
-                this,
-                fileList,
-                R.layout.spec_item_list,
-                new String[]{"seq","fileName"},
-                new int[]{R.id.tv_item_seq, R.id.tv_item_name}
-        );
-        lvItemList.setAdapter(simpleAdapter);
-        setListViewHeightBasedOnChildren(lvItemList);
+        if(fileList!=null) {
+            SimpleAdapter simpleAdapter = new SimpleAdapter(
+                    this,
+                    fileList,
+                    R.layout.spec_item_list,
+                    new String[]{"seq", "fileName"},
+                    new int[]{R.id.tv_item_seq, R.id.tv_item_name}
+            );
+            lvItemList.setAdapter(simpleAdapter);
+            setListViewHeightBasedOnChildren(lvItemList);
 
 
-        final List<HashMap<String, Object>> finalFileList = fileList;
-        lvItemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final String fileName = finalFileList.get(i).get("fileName").toString();
-                System.out.println(finalFileList.get(i));
-                tvFileInfo.setText(fileName);
-                openDialog();
-            }
-        });
+            final List<HashMap<String, Object>> finalFileList = fileList;
+            lvItemList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                    final String fileName = finalFileList.get(i).get("fileName").toString();
+                    System.out.println(finalFileList.get(i));
+                    tvFileInfo.setText(fileName);
+                    openDialog();
+                }
+            });
+        }
     }
 
     /**
@@ -437,7 +468,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     json.put("operation","uploadFile");
                     json.put("bucketName","deadlinefighters");
-                    json.put("fileDetails",fileName); //file name or file path?
+                    json.put("fileDetails",fileName);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -448,7 +479,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             public void onResponse(JSONObject response) {
                                 try {
                                     String url = response.getString("url");
-                                    Log.d("upload",fileName +"   "+url);
+                                    Log.d("Upload",fileName +"   "+url);
                                     new Thread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -467,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(getApplicationContext(),"Error getting response", Toast.LENGTH_SHORT).show();
                     }
                 });
-                jsonObjectRequest.setTag("request for download.");
+                jsonObjectRequest.setTag("Request for upload.");
                 queue.add(jsonObjectRequest);
             }
         }).start();
@@ -480,8 +511,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String filePath = filepath + "/" + fileName;
         Log.d("uploadfile",filePath);
 
-        HttpURLConnection conn = null;
-        DataOutputStream dos = null;
         String lineEnd = "\r\n";
         String twoHyphens = "--";
         String boundary = "*****";
@@ -499,11 +528,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 // open a URL connection
                 FileInputStream fileInputStream = new FileInputStream(sourceFile);
+
                 java.net.URL url = new URL(Url);
 
 
                 // Open a HTTP  connection to  the URL
-                conn = (HttpURLConnection) url.openConnection();
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoInput(true); // Allow Inputs
                 conn.setDoOutput(true); // Allow Outputs
                 conn.setUseCaches(false); // Don't use a Cached Copy
@@ -513,7 +543,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
                 conn.setRequestProperty("uploaded_file", filePath);
 
-                dos = new DataOutputStream(conn.getOutputStream());
+                DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
 //
                 dos.writeBytes(twoHyphens + boundary + lineEnd);
                 dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";file\""
@@ -571,54 +601,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void downloadFile() {
 
-//        if (isPathExist(filepath)) {
-//
-//        final String fileName = tvFileInfo.getText().toString();
-//
-//            final File localFile = new File(filepath, "/" + fileName);
-//
-//            Log.d("downloadFile", "Get file path: " + localFile.getAbsolutePath());
-//
-//            TransferUtility transferUtility =
-//                    TransferUtility.builder()
-//                            .context(getApplicationContext())
-//                            .awsConfiguration(AWSMobileClient.getInstance().getConfiguration())
-//                            .s3Client(s3Client)
-//                            .build();
-//
-//            TransferObserver downloadObserver =
-//                    transferUtility.download(fileName,localFile);
-//localFile
-//            downloadObserver.setTransferListener(new TransferListener() {
-//
-//                @Override
-//                public void onStateChanged(int id, TransferState state) {
-//                    if (TransferState.COMPLETED == state) {
-//                        Toast.makeText(getApplicationContext(), "Download:" + fileName, Toast.LENGTH_SHORT).show();
-//
-//                        tvFileName.setText(fileName);
-//                        Log.d("MainActivity", "Get file path: " + localFile.getAbsolutePath());
-//
-//                    }
-//                }
-//
-//                @Override
-//                public void onProgressChanged(int id, long bytesCurrent, long bytesTotal) {
-//                    float percentDonef = ((float) bytesCurrent / (float) bytesTotal) * 100;
-//                    int percentDone = (int) percentDonef;
-//
-//                    tvFileName.setText("ID:" + id + "|bytesCurrent: " + bytesCurrent + "|bytesTotal: " + bytesTotal + "|" + percentDone + "%");
-//                }
-//
-//                @Override
-//                public void onError(int id, Exception ex) {
-//                    ex.printStackTrace();
-//                }
-//
-//            });
-//        }else {
-//            Toast.makeText(this, "File path is not exist.", Toast.LENGTH_LONG).show();
-//        }
     }
 
     private void downloadFiles(){
@@ -640,17 +622,79 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void deleteFile(){
-
-
+    protected void sendDeleteRequest(){
         new Thread(new Runnable() {
             @Override
             public void run() {
-                final String fileName = tvFileInfo.getText().toString();
-                s3Client.deleteObject(bucketName,fileName);
+                String fileName = tvFileInfo.getText().toString();
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("operation","deleteFile");
+                    json.put("bucketName","deadlinefighters");
+                    json.put("fileDetails",fileName);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, json,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    String url = response.getString("url");
+                                    Log.d("delete",fileName +"   "+url);
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            deleteFile(fileName,url);
+                                        }
+                                    }).start();
+                                    Toast.makeText(getApplicationContext(),"Request for delete sent", Toast.LENGTH_SHORT).show();
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(),"Error invoking delete", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                jsonObjectRequest.setTag("Request for delete.");
+                queue.add(jsonObjectRequest);
             }
         }).start();
 
+
+    }
+
+
+    private void deleteFile(String fileName, String Url) {
+        String filePath = filepath + "/" + fileName;
+        Log.d("deleteFile called for: ", filePath);
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        try {
+
+            StringRequest stringRequest = new StringRequest(Request.Method.DELETE, Url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            Toast.makeText(getApplicationContext(),"Deletion successful", Toast.LENGTH_SHORT).show();
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getApplicationContext(),"Error during deleting file", Toast.LENGTH_SHORT).show();
+                }
+            });
+            queue.add(stringRequest);
+        }
+        catch(Exception e){
+            Log.d("DeleteFile","Unknown error: "+e);
+        }
     }
 
     public List<HashMap<String, Object>> getLocalFiles(String dirPath) {
@@ -761,7 +805,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             InputStream inputStream = context.getContentResolver().openInputStream(srcUri);
             if (inputStream == null) return;
             OutputStream outputStream = new FileOutputStream(dstFile);
-            IOUtils.copy(inputStream, outputStream);
             inputStream.close();
             outputStream.close();
         } catch (IOException e) {
@@ -864,7 +907,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             List<HashMap<String, Object>> fileList = new ArrayList<HashMap<String,Object>>();
             int seq = 0;
 
-            ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
+            /*ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
                     .withBucketName(bucketName);
             ObjectListing objectListing;
             do {
@@ -888,7 +931,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 listObjectsRequest.setMarker(objectListing.getNextMarker());
                 return fileList;
-            } while (objectListing.isTruncated());
+            } while (objectListing.isTruncated());*/
+            return null;
         }
     }
 
@@ -907,19 +951,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             switch (event){
                 case FileObserver.MODIFY:
                     Log.d(TAG, "MODIFY:"  + absolutePath +"/" + path);
-                    if (!s3Client.doesObjectExist(bucketName, path)){
-                        uploadFile();
-                    }
                     break;
                 case FileObserver.CREATE:
                     Log.d(TAG, "CREATE:"  + absolutePath +"/" + path);
-                    if (!s3Client.doesObjectExist(bucketName, path)){
-                        uploadFile();
-                    }
                     break;
                 case FileObserver.DELETE:
                     Log.d(TAG, "DELETE:"  + absolutePath +"/" + path);
-                    deleteFile();
+                    sendDeleteRequest();
                     break;
             }
         }
