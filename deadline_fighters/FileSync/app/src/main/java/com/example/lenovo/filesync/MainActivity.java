@@ -428,40 +428,146 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     protected void sendUploadRequest() {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                String fileName = tvFileInfo.getText().toString();
-//                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-//                JSONObject json = new JSONObject();
-//                try {
-//                    json.put("operation","uploadFile");
-//                    json.put("bucketName","deadlinefighters");
-//                    json.put("fileDetails",fileName); //file name or file path?
-//                } catch (JSONException e) {
-//                    e.printStackTrace();
-//                }
-//
-//                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, json,
-//                        new Response.Listener<JSONObject>() {
-//                            @Override
-//                            public void onResponse(JSONObject response) {
-//                                Toast.makeText(getApplicationContext(), "String Response : "+ response.toString(), Toast.LENGTH_SHORT).show();
-//                            }
-//                        }, new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        Toast.makeText(getApplicationContext(),"Error getting response", Toast.LENGTH_SHORT).show();
-////                tvFileName.setText("Error getting response");
-//                    }
-//                });
-//                jsonObjectRequest.setTag("request for download.");
-//                queue.add(jsonObjectRequest);
-//            }
-//        }).start();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String fileName = tvFileInfo.getText().toString();
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("operation","uploadFile");
+                    json.put("bucketName","deadlinefighters");
+                    json.put("fileDetails",fileName); //file name or file path?
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, json,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    String url = response.getString("url");
+                                    Log.d("upload",fileName +"   "+url);
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            uploadFile(fileName,url);
+                                        }
+                                    }).start();
+                                    Toast.makeText(getApplicationContext(),"Upload Completed", Toast.LENGTH_SHORT).show();
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(),"Error getting response", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                jsonObjectRequest.setTag("request for download.");
+                queue.add(jsonObjectRequest);
+            }
+        }).start();
 
 
     }
+
+    public void uploadFile(String fileName, String Url) {
+        
+        String filePath = filepath + "/" + fileName;
+        Log.d("uploadfile",filePath);
+
+        HttpURLConnection conn = null;
+        DataOutputStream dos = null;
+        String lineEnd = "\r\n";
+        String twoHyphens = "--";
+        String boundary = "*****";
+        int bytesRead, bytesAvailable, bufferSize;
+        byte[] buffer;
+        int maxBufferSize = 1 * 1024 * 1024;
+        File sourceFile = new File(filePath);
+
+        if (!sourceFile.isFile()) {
+            Log.e("uploadFile", "Source File not exist.");
+        }
+        else
+        {
+            try {
+
+                // open a URL connection
+                FileInputStream fileInputStream = new FileInputStream(sourceFile);
+                java.net.URL url = new URL(Url);
+
+
+                // Open a HTTP  connection to  the URL
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setDoInput(true); // Allow Inputs
+                conn.setDoOutput(true); // Allow Outputs
+                conn.setUseCaches(false); // Don't use a Cached Copy
+                conn.setRequestMethod("PUT");
+                conn.setRequestProperty("Connection", "Keep-Alive");
+                conn.setRequestProperty("ENCTYPE", "multipart/form-data");
+                conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+                conn.setRequestProperty("uploaded_file", filePath);
+
+                dos = new DataOutputStream(conn.getOutputStream());
+//
+                dos.writeBytes(twoHyphens + boundary + lineEnd);
+                dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";file\""
+                        + fileName + "\"" + lineEnd);
+
+                        dos.writeBytes(lineEnd);
+
+                // create a buffer of  maximum size
+                bytesAvailable = fileInputStream.available();
+
+                bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                buffer = new byte[bufferSize];
+
+                // read file and write it into form...
+                bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                while (bytesRead > 0) {
+
+                    dos.write(buffer, 0, bufferSize);
+                    bytesAvailable = fileInputStream.available();
+                    bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                    bytesRead = fileInputStream.read(buffer, 0, bufferSize);
+
+                }
+
+                // send multipart form data necesssary after file data...
+                dos.writeBytes(lineEnd);
+                dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd);
+
+                // Responses from the server (code and message)
+                int serverResponseCode = conn.getResponseCode();
+                String serverResponseMessage = conn.getResponseMessage();
+
+                Log.i("uploadFile", "HTTP Response is : "
+                        + serverResponseMessage + ": " + serverResponseCode);
+
+                //close the streams //
+                fileInputStream.close();
+                dos.flush();
+                dos.close();
+
+            } catch (MalformedURLException ex) {
+
+                ex.printStackTrace();
+                Log.e("Upload file to server", "error: " + ex.getMessage(), ex);
+            } catch (Exception e) {
+
+                e.printStackTrace();
+                Log.e("Upload file to server Exception", "Exception : "
+                        + e.getMessage(), e);
+            }
+
+        }
+}
 
     private void downloadFile() {
 
