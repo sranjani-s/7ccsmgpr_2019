@@ -59,6 +59,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -187,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onClick(View view) {
                 if (!file.exists()){
-                    deleteFile();
+                    sendDeleteRequest();
                 } else{
                     deleteLocalFile();
                 }
@@ -467,7 +468,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     json.put("operation","uploadFile");
                     json.put("bucketName","deadlinefighters");
-                    json.put("fileDetails",fileName); //file name or file path?
+                    json.put("fileDetails",fileName);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -478,7 +479,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             public void onResponse(JSONObject response) {
                                 try {
                                     String url = response.getString("url");
-                                    Log.d("upload",fileName +"   "+url);
+                                    Log.d("Upload",fileName +"   "+url);
                                     new Thread(new Runnable() {
                                         @Override
                                         public void run() {
@@ -497,7 +498,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(getApplicationContext(),"Error getting response", Toast.LENGTH_SHORT).show();
                     }
                 });
-                jsonObjectRequest.setTag("request for download.");
+                jsonObjectRequest.setTag("Request for upload.");
                 queue.add(jsonObjectRequest);
             }
         }).start();
@@ -510,8 +511,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String filePath = filepath + "/" + fileName;
         Log.d("uploadfile",filePath);
 
-        HttpURLConnection conn = null;
-        DataOutputStream dos = null;
         String lineEnd = "\r\n";
         String twoHyphens = "--";
         String boundary = "*****";
@@ -534,7 +533,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
                 // Open a HTTP  connection to  the URL
-                conn = (HttpURLConnection) url.openConnection();
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setDoInput(true); // Allow Inputs
                 conn.setDoOutput(true); // Allow Outputs
                 conn.setUseCaches(false); // Don't use a Cached Copy
@@ -544,7 +543,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 conn.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
                 conn.setRequestProperty("uploaded_file", filePath);
 
-                dos = new DataOutputStream(conn.getOutputStream());
+                DataOutputStream dos = new DataOutputStream(conn.getOutputStream());
 //
                 dos.writeBytes(twoHyphens + boundary + lineEnd);
                 dos.writeBytes("Content-Disposition: form-data; name=\"uploaded_file\";file\""
@@ -623,9 +622,79 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
-    private void deleteFile(){
+    protected void sendDeleteRequest(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String fileName = tvFileInfo.getText().toString();
+                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+                JSONObject json = new JSONObject();
+                try {
+                    json.put("operation","deleteFile");
+                    json.put("bucketName","deadlinefighters");
+                    json.put("fileDetails",fileName);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST, URL, json,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                try {
+                                    String url = response.getString("url");
+                                    Log.d("delete",fileName +"   "+url);
+                                    new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            deleteFile(fileName,url);
+                                        }
+                                    }).start();
+                                    Toast.makeText(getApplicationContext(),"Request for delete sent", Toast.LENGTH_SHORT).show();
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        Toast.makeText(getApplicationContext(),"Error invoking delete", Toast.LENGTH_SHORT).show();
+                    }
+                });
+                jsonObjectRequest.setTag("Request for delete.");
+                queue.add(jsonObjectRequest);
+            }
+        }).start();
 
 
+    }
+
+
+    private void deleteFile(String fileName, String Url) {
+        String filePath = filepath + "/" + fileName;
+        Log.d("deleteFile called for: ", filePath);
+        RequestQueue queue = Volley.newRequestQueue(this);
+
+        try {
+
+            StringRequest stringRequest = new StringRequest(Request.Method.DELETE, Url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            Toast.makeText(getApplicationContext(),"Deletion successful", Toast.LENGTH_SHORT).show();
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                    Toast.makeText(getApplicationContext(),"Error during deleting file", Toast.LENGTH_SHORT).show();
+                }
+            });
+            queue.add(stringRequest);
+        }
+        catch(Exception e){
+            Log.d("DeleteFile","Unknown error: "+e);
+        }
     }
 
     public List<HashMap<String, Object>> getLocalFiles(String dirPath) {
@@ -888,7 +957,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     break;
                 case FileObserver.DELETE:
                     Log.d(TAG, "DELETE:"  + absolutePath +"/" + path);
-                    deleteFile();
+                    sendDeleteRequest();
                     break;
             }
         }
