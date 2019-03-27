@@ -17,18 +17,11 @@
         android:text="File Select" />
 
     <Button
-        android:id="@+id/btn_upload_file"
+        android:id="@+id/btn_sync_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:text="Upload" />
-
-    <Button
-        android:id="@+id/btn_download_file"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Download" />
+        android:text="Sync" />
 
     <Button
         android:id="@+id/btn_delete_file"
@@ -37,12 +30,7 @@
         android:layout_gravity="center"
         android:text="Delete" />
 
-    <Button
-        android:id="@+id/btn_rename_file"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="Rename" />
+
 
 
 
