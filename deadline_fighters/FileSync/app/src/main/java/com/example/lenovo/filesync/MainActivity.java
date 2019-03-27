@@ -398,12 +398,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     if (response!=null) {
 
                                         String url = response.getString("url");
-                                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
+                                        DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
+                                                .setDestinationInExternalPublicDir(folder,fileName)
+                                                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
 
                                         request.allowScanningByMediaScanner();
-                                        request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-
-                                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName);
 
                                         DownloadManager manager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
                                         manager.enqueue(request);
@@ -413,7 +412,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     e.printStackTrace();
                                 }
                                 Toast.makeText(getApplicationContext(), "String Response : "+ response.toString(), Toast.LENGTH_SHORT).show();
-                        tvFileName.setText("String Response : "+ response.toString());
                             }
                         }, new Response.ErrorListener() {
                     @Override
@@ -421,7 +419,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(getApplicationContext(),"Error getting response", Toast.LENGTH_SHORT).show();
                     }
                 });
-//                jsonObjectRequest.setTag("request for download.");
+                jsonObjectRequest.setTag("request for download.");
                 queue.add(jsonObjectRequest);
             }
         }).start();
