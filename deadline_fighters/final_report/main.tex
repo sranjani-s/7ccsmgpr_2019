@@ -32,48 +32,10 @@
 \input{cite}
 \input{Requirements_and_design}
 \input{implementation}
+\input{test}
 \input{team_contribution}
+\input{evaluation}
 }
-
-
-\section{Evaluation}
-Comparing the design part to the implementation part, here is a table of what design functions are worked and what are not:\newline
-
-
-
-\begin{table}[h]
-\caption{Priority of operations}
-\centering
-\begin{tabular}{|c|p{8cm}|p{2cm}|}
-\hline
-Operation & Object & Whether it is completed \\
-\hline
-\multirow{2}{*}{Upload}&{One file (May not in the local sync folder)}&Yes\\
-\cline{2-3}
-&All files in the local sync folder&Yes\\
-\cline{1-3}
-\multirow{2}{*}{Download}&{One file}&Yes\\
-\cline{2-3}
-&All files&Yes\\
-\cline{1-3}
-\multirow{2}{*}{Delete}&{One file}&Yes\\
-\cline{2-3}
-&All files&No\\
-\cline{1-3}
-\multirow{2}{*}{Rename}&{One file}&Yes\\
-\cline{2-3}
-&Two or more files&No\\
-\cline{1-3}
-\multirow{2}{*}{Edit}&{One file}&No\\
-\cline{2-3}
-&Two or more files&No\\
-\cline{1-3}
-\multirow{1}{*}{Synchronize}&{All files in the server and local syn folder}&Yes\\
-
-\bottomrule
-\end{tabular}
-\end{table}
-
 
 \end{flushleft}
 

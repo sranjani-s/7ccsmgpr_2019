@@ -1,113 +1,32 @@
 
-\section{Test}
+\section{Testing}
 
-In the project, our team conducted a black box test on the file synchronization tool. At the beginning, our team tested the transmission of different kinds of file names and file formats. As shown below (Table Black box test result at the beginning). As you can see from the table, we have file names under different language specifications, file names with special symbols, and different types of file formats, such as zip, png, and docx etc. used to do the upload, download, delete and rename function tests. For the uploading, downloading and deleting of files, all the objects we tested can be implemented successfully. However, for the rename function, file names with Chinese names and special symbols cannot be renamed. \newline
-At the end of the project, our system implemented automation synchronize function, and these files with Chinese names and special symbols finally achieved in rename function. We analyzed the reason why we couldn't achieve it before because the name of the renamed file needs to be written in the code when we originally developed the product function, and the name with Chinese characters may be inconsistent with the language environment in which the code is written. So, the function cannot be achieved.\newline
-Furthermore, we also learned and configuration test environment of Mocha, Chai and Sinon for the desktop application. We try to implement the jsunit test. But for some reasons, it is not complete.\newline
+For most duration of the project, testing was blackbox and manual. Tests were conducted for synchronization of various file names (characters) and formats. This brought out bugs in json formatting, file name encoding and HTTP request format.\newline
 
-For the desktop client, we found some issues in the test.\\
-For the special symbol file we have meet some issues：\\
+Furthermore, we also learned and configured test environment of Mocha, Chai and Sinon for the desktop application. We tried to implement the jsunit test. Due to lack of time to research more, it could not be completed.\newline
+
+Some of the specific issues found on the desktop client, include:\newline
 \begin{itemize}
-\item{Pdf file with（“space” “-” "'"） can download but not open. Mostly can open.}
-\item{ File name with "'" can be deleted in the local folder but cannot be deleted by using the delete button.}
-\item{File with special symbol（*&） can upload but cannot download.}
-\item{Irregular naming： \/:*?”<>|, the computer system will show that when we go to rename the file.}
-\item{In addition to non-standard named symbols, file names with special symbols cannot be renamed, but a new file is uploaded.}
+\item{PDF file with characters such as space,-,'' can be downloaded but cannot be opened. Other PDFs can.}\newline
+\item{File name with ' can be deleted in the local folder but cannot be deleted by using the delete button which invokes server delete.}\newline
+\item{File with special symbol（*\&） can be uploaded but cannot be downloaded.}\newline
+\item{In addition to non-standard named symbols, file names with special symbols (non-ASCII) cannot be renamed, but a new file with those symbols in their name can be uploaded.}\newline
+\item{Batch delete/upload does not work.}\newline
 \end{itemize}
 
-Besides, for the file name with Chinese we also have two issues：\\
-\begin{itemize}
-\item{Upload from local/download from aws file meet JSON issue because of Chinese word}
-\item{Two or more files cannot be deleted, uploaded}
-\end{itemize}
+The test case results are as shown below for Desktop client:\newline
 
-The .zip formatted file can be download to local folder from server but it is damaged.
-
-
-
-Test case is show below:\\
-\begin{table}[H]
-\caption{Test Case}
+\begin{figure}[H]
 \centering
-\begin{tabular}{|p{2.5cm}|c|c|c|c|c|c|}
-\hline
-File & \multicolumn{3}{|c|}{Desktop} &\multicolumn{3}{|c|}{Android} \\
-\hline
-& upload & download & delete & upload & download & delete \\
-\hline
-Test.txt & T & T & T\\
-\hline
-123.docx & T & T & T\\
-\hline
-测试.pdf& F & F & F\\
-\hline
-!,,!.jpg & T & T & T\\
-\hline
-测试test.gif& F & F & F\\
-\hline
-Test!!!.png & T & T & T\\
-\hline
-123.mp3& T & T & T\\
-\hline
-2019df.mp4 & T & T & T\\
-\hline
-!,,!.zip  & T & F & T\\
-\hline
-Hello.rar& T & T & T\\
-\hline
-Test!!!.exe& T & T & T\\
-\hline
-Test.html& T & T & T\\
-\hline
-2019df.js& T & T & T\\
-\hline
-'!,,!'.ppt & T & F & F\\
-\hline
-test123.db & T & T & T\\
-\hline
-\bottomrule
-\end{tabular}
-\end{table}
+\subfigure[Upload,Download,Delete]{\includegraphics[width=60mm]{UDD.png}}%
+\subfigure[Edit and Rename]{\includegraphics[width=60mm]{Rename.png}}
+\end{figure}
 
-\begin{table}[H]
-\caption{Test Case}
+The test case results for Mobile Client are as shown. Adding files are not as simple on Mobile as it is on Desktop and thus, the test cases are different:\newline
+
+\begin{figure}[H]
 \centering
-\begin{tabular}{|p{2.5cm}|c|c|c|c|c|c|}
-\hline
-File & \multicolumn{3}{|c|}{Desktop} &\multicolumn{3}{|c|}{Android} \\
-\hline
-& Rename to & Rename result & Edit & Rename to & Rename result & Edit  \\
-\hline
-Test.txt & 123.docx & T & T\\
-\hline
-123.docx & 测试.pdf& F & T\\
-\hline
-测试.pdf& !,,!.jpg & F & F\\
-\hline
-!,,!.jpg & 测试test.gif & F & T\\
-\hline
-测试test.gif& Test!!!.png & F & F\\
-\hline
-Test!!!.png & 123.mp3 & T & T\\
-\hline
-123.mp3& 2019df.mp4 & T & T\\
-\hline
-2019df.mp4 & !,,!.zip  & T & T\\
-\hline
-!,,!.zip  & Hello.rar & F & T\\
-\hline
-Hello.rar& Test!!!.exe & T & T\\
-\hline
-Test!!!.exe & Test.html & T & T\\
-\hline
-Test.html& 2019df.js & T & T\\
-\hline
-2019df.js& '!,,!'.ppt & T & T\\
-\hline
-'!,,!'.ppt & test123.db & F & T\\
-\hline
-test123.db & Test.txt & T & T\\
-\hline
-\bottomrule
-\end{tabular}
-\end{table}
+\includegraphics[scale=0.5]{mobiletest}
+\end{figure}
+
+\newline
