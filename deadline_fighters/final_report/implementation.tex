@@ -1,0 +1,8 @@
+\section{Implementation}
+
+The initial team of 6 was divided into sub-teams of 2, each handling desktop client, mobile client and the server component. At this point, server component was AWS S3 and the client applications made direct calls. After team restructuring, development of local server began while the client applications continued to build the system to talk to AWS S3. Desktop, mobile and server code were pushed into corresponding feature branch and then merged into the master branch at regular intervals. This allowed for better testing and narrowing down of issues.\newline
+
+Once the basic decisions about the server were made and functionalities implemented, client applications were migrated to interact through the local server. This delayed progress which we could have used into feature building if we had made better decisions on the server.\newline
+
+Development process was agile with weekly scrum meetings on Thurdays. Emphasis was laid on writing maintainable features and code. Efforts were directed into code reviews, logging for client and server and documenting commonly faced issues. Bugs were tracked under \emph{issues} on our Git repository.\newline
+
