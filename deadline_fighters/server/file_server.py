@@ -9,9 +9,9 @@ import json
 import os #Get current directory
 import sys #Check platform
 import botocore
-import mysql.connector
 import sqlite3
 import datetime # For logging
+from sqlite3 import Error
 
 from shutil import copyfile
 from os.path import expanduser,isfile,join
@@ -41,23 +41,64 @@ def log(string):
 	with open(logDir+datetime.datetime.today().strftime('%Y-%m-%d')+".txt", 'a+') as f:
 		print >> f, datetime.datetime.now(),string
 
+def create_connection(db_file):
+	try:
+		conn = sqlite3.connect(db_file)
+		return conn
+	except Error as e:
+		print(e)
+ 
+	return None
+
+def create_table(conn, create_table_sql):
+	try:
+		c = conn.cursor()
+		c.execute(create_table_sql)
+	except Error as e:
+		print(e)
+
+
+###### DB functions #######
+def insert_entry(conn,entry):
+	log("Inside insert_entry")
+	sql = '''	INSERT OR REPLACE INTO etag(fileName,etag,lastModified)
+				VALUES(?,?,?)'''
+	cur = conn.cursor()
+	cur.execute(sql, entry)
+	conn.commit()
+	return cur.lastrowid
 
 
 ###### AWS Operations ######
 
+def updateDB():
+	log("Updating DB...")
+	objectListDict = s3.list_objects(Bucket = bucketName)
+	if 'Contents' in objectListDict:
+		log("Contents present to update DB")
+		for objects in objectListDict['Contents']:
+			entry = (objects['Key'],objects['ETag'],objects['LastModified']);
+			insert_entry(conn,entry)
+
+			
+
+
 def upload_file(fileName):
+		updateDB()
 		log("Call for upload for file "+ fileName)
 		url = (s3.generate_presigned_url('put_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100))
 		log(" Upload URL fetched "+ url)
 		return json.dumps({'url':url})
 
 def download_file(fileName):
+		updateDB()
 		log("Call for download for file "+ fileName)
 		url = s3.generate_presigned_url('get_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100)
 		log(" Download URL fetched "+ url)
 		return json.dumps({'url':url})
 
 def delete_file(fileName):
+		updateDB()
 		log("Call for delete for file "+ fileName)
 		url = s3.generate_presigned_url('delete_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100)
 		log(" Delete URL fetched "+ url)
@@ -65,6 +106,7 @@ def delete_file(fileName):
 
 
 def download_All():
+		updateDB()
 		log("Call for download_All")
 		objectListDict = s3.list_objects(Bucket = bucketName)
 		finalDownloadAllJson = []
@@ -78,6 +120,7 @@ def download_All():
 		return json.dumps({'downloadAll':finalDownloadAllJson})
 
 def upload_All():
+		updateDB()
 		log("Call for upload_All")
 		finalUploadAllJson = []
 		for f in listdir(syncDir):
@@ -91,6 +134,7 @@ def upload_All():
 
 #Sync: Pull before Push
 def sync_All(fileName):
+		updateDB()
 		log("Call for sync_All")
 		finalSyncAllJson =[]
 		downloadAllJson = download_All()
@@ -100,6 +144,7 @@ def sync_All(fileName):
 		return json.dumps({'syncAll':finalSyncAllJson})
 
 def list_All(fileName):
+		updateDB()
 		log("Call for list_All")
 		objectListDict = s3.list_objects(Bucket = bucketName)
 		log(objectListDict)
@@ -166,6 +211,7 @@ class S(BaseHTTPRequestHandler):
 			self.wfile.write(jsonResponse.encode('utf-8'))
 
 def run(server_class=HTTPServer, handler_class=S, port=80):
+	updateDB()
 	server_address = ('', port)
 	httpd = server_class(server_address, handler_class)
 	log("<------Starting new session------------>")
@@ -175,6 +221,22 @@ def run(server_class=HTTPServer, handler_class=S, port=80):
 
 if __name__ == "__main__":
 	from sys import argv
+
+	database = homeDir+"/deadlinefighters.db"
+
+	if os.path.exists(database):
+		os.rename(homeDir+"/deadlinefighters.db", homeDir+"/deadlinefighters-copy.db")
+
+	create_etag_table = """ CREATE TABLE IF NOT EXISTS etag (
+										fileName text NOT NULL PRIMARY KEY,
+										etag text NOT NULL,
+										lastModified text NOT NULL
+									); """
+	conn = create_connection(database)
+	if conn is not None:
+		create_table(conn, create_etag_table)
+	else:
+		log("Error! Cannot create the database connection.")
 
 	if len(argv) == 2:
 		run(port=int(argv[1]))
