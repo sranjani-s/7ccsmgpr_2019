@@ -68,6 +68,28 @@
 				const httpreq = require('httpreq');
 				const os = require('os');
 				const chokidar = require('chokidar');
+				const mime = require('mime-types');
+				var mysql = require('mysql');
+				
+
+
+				var con = mysql.createConnection({
+				  host: "localhost",
+				  user: "root",
+				  password: 'deadlinefighters',
+				  database: 'deadlinefighters'
+				});
+
+				con.connect(function(err) {
+				  if (err) throw err;
+				  console.log("Connected to Database!");
+					var sql = "CREATE TABLE IF NOT EXISTS etag (fileName VARCHAR(255) PRIMARY KEY, eTag VARCHAR(255) NOT NULL);";
+					con.query(sql, function (err, result) {
+					if (err) throw err;
+						console.log("Table created");
+					});
+				});
+
 			
 				/* Create folder for sync and log */
 				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
@@ -130,6 +152,23 @@
 					}
 				}
 
+				/* DB Functions */
+
+				function fetchLocalEtag(fileName,callback){
+					console.log("Entered fetchLocalEtag for " + fileName);
+					var sql = "SELECT eTag from etag WHERE fileName = '"+ fileName +"';"
+
+					con.query(sql, function (err, result) {
+							if (err) 
+								callback(err,null);
+							else if(result.length==0)
+								callback(null,null);
+							else 
+								callback(null,result[0].eTag);
+					});
+					return;
+				}
+
 				/* HTTP calls to Python server */
 				function listObjectsinServer(){
 					console.log("listObjectsinServer called");
@@ -151,6 +190,12 @@
 										var obj = listAllJson[i];
 										if(obj.hasOwnProperty('fileName')){
 											$('#objectList').append("<button  id="+i+" value= '"+obj.fileName+"'>"+obj.fileName+"</button><br>");
+											var eTag = (obj.ETag).replace(/["']/g, "'");
+											var sql = "REPLACE INTO etag(fileName,eTag) VALUES('"+obj.fileName+"',"+eTag+");";
+											con.query(sql, function (err, result) {
+												if (err) throw err;
+												console.log("Entry for "+ obj.fileName +" altered in DB");
+											});
 										}
 									}
 								}
@@ -170,19 +215,35 @@
 				watcher
 				  .on('add', function(dir) {
 						console.log('File', dir, 'has been added');
+
+						var localEtag;
+
+						fetchLocalEtag(dir.replace(/^.*[\\\/]/, ''),function(err,data){
+							if(err)
+								console.log("No localEtag present");
+							else
+								localEtag = data;
+						});
+
 						xhr.open("POST", url, true);
 						xhr.setRequestHeader("Content-Type", "application/json");
 						results.innerHTML = '';
 
 						var fileName = dir.replace(/^.*[\\\/]/, '');
-						data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": fileName}});
+						data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "localEtag": localEtag, "fileDetails": {"fileName": fileName}});
+
+						console.log(data);
 
 						xhr.onreadystatechange = function () {
 							if (xhr.readyState === 4 && xhr.status === 200) {
+
+								console.log(xhr.responseText);
+
 								jsonResponse = JSON.parse(xhr.responseText);
 
 								var xhrUpload = new XMLHttpRequest ();
 								xhrUpload.open("PUT", jsonResponse["url"], true);
+								xhrUpload.setRequestHeader("Content-Type",mime.lookup(dir)); 
 
 								xhrUpload.onreadystatechange = function () {
 									if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
@@ -205,35 +266,57 @@
 				  })
 				  .on('change', function(dir) {
 						console.log('File', dir, 'has been edited');
-						xhr.open("POST", url, true);
-						xhr.setRequestHeader("Content-Type", "application/json");
-						results.innerHTML = '';
 
-						var fileName = dir.replace(/^.*[\\\/]/, '');
-						data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": fileName}});
+						fetchLocalEtag(dir.replace(/^.*[\\\/]/, ''),function(err,localEtag){
+							if(err)
+								console.log("No localEtag present");
+							else
+							{
+								console.log("localEtag fetched!");
 
-						xhr.onreadystatechange = function () {
-							if (xhr.readyState === 4 && xhr.status === 200) {
-								jsonResponse = JSON.parse(xhr.responseText);
+								xhr.open("POST", url, true);
+								xhr.setRequestHeader("Content-Type", "application/json");
+								results.innerHTML = '';
 
-								var xhrUpload = new XMLHttpRequest ();
-								xhrUpload.open("PUT", jsonResponse["url"], true);
+								var fileName = dir.replace(/^.*[\\\/]/, '');
 
-								xhrUpload.onreadystatechange = function () {
-									if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
-										console.log("Upload successful for "+dir);
-										listObjectsinServer();
+								if(localEtag!=null){
+									data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "localEtag": localEtag, "fileDetails": {"fileName": fileName}});
+								}
+								else{
+									console.log("New upload!")
+									data = JSON.stringify({"operation": "uploadFile", "bucketName": "deadlinefighters", "fileDetails": {"fileName": fileName}});
+								}
+
+
+								xhr.onreadystatechange = function () {
+									if (xhr.readyState === 4 && xhr.status === 200) {
+
+										console.log(xhr.responseText);
+
+										jsonResponse = JSON.parse(xhr.responseText);
+
+										var xhrUpload = new XMLHttpRequest ();
+										xhrUpload.open("PUT", jsonResponse["url"], true);
+										xhrUpload.setRequestHeader("Content-Type",mime.lookup(dir)); 
+
+										xhrUpload.onreadystatechange = function () {
+											if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
+												console.log("Upload successful for "+dir);
+												listObjectsinServer();
+											}
+										};
+
+										xhrUpload.send(fs.readFileSync(dir));
+									}
+									else if(xhr.status!=200) {
+										results.innerHTML = 'ERROR!';
 									}
 								};
-
-								xhrUpload.send(fs.readFileSync(dir));
+								xhr.send(data);
 							}
-							else if(xhr.status!=200) {
-								results.innerHTML = 'ERROR!';
-							}
-						};
-						xhr.send(data);
-				  })
+				  		});
+					})
 				  .on('unlink', function(dir) {
 						console.log('File', dir, 'has been removed');
 
@@ -272,8 +355,6 @@
 					   console.log('Error happened', error);
 				  })
 				  .on('raw', function(event, dir, details) {
-					   // This event should be triggered everytime something happens.
-					   console.log('Raw event info:', event, dir, details);
 				  }); 
 				
 			  
@@ -346,7 +427,7 @@
 						var i = $(this).attr('id');
 						$('#'+i).css('color', 'gray');
 						downloadbtn.hidden = false;
-                        deletebtn.hidden = false;
+						deletebtn.hidden = false;
 
 						var file = $(this).val(); 
 
@@ -386,7 +467,7 @@
 						xhr.send(data);
 						$('#'+i).css('color', 'black');
 						downloadbtn.hidden = true;
-                        deletebtn.hidden = true;
+						deletebtn.hidden = true;
 						});
 
 				  
@@ -420,7 +501,7 @@
 						xhr.send(data);
 						$('#'+i).css('color', 'black');
 						downloadbtn.hidden = true;
-                        deletebtn.hidden = true;
+						deletebtn.hidden = true;
 						});
 					});
 		

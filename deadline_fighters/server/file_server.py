@@ -42,11 +42,12 @@ def log(string):
 		print >> f, datetime.datetime.now(),string
 
 def create_connection(db_file):
+	global conn
 	try:
 		conn = sqlite3.connect(db_file)
 		return conn
 	except Error as e:
-		print(e)
+		log(e)
  
 	return None
 
@@ -55,19 +56,29 @@ def create_table(conn, create_table_sql):
 		c = conn.cursor()
 		c.execute(create_table_sql)
 	except Error as e:
-		print(e)
+		log(e)
 
 
 ###### DB functions #######
 def insert_entry(conn,entry):
 	log("Inside insert_entry")
-	sql = '''	INSERT OR REPLACE INTO etag(fileName,etag,lastModified)
-				VALUES(?,?,?)'''
+	sql = '''	INSERT OR REPLACE INTO etag(fileName,etag)
+				VALUES(?,?)'''
 	cur = conn.cursor()
 	cur.execute(sql, entry)
 	conn.commit()
 	return cur.lastrowid
 
+def is_conflict(fileName,localETag):
+	sql = '''	SELECT eTag FROM etag
+				WHERE fileName = (?) '''
+	curr = conn.cursor()
+	curr.execute(sql,[fileName])
+	serverETag = (curr.fetchone()[0]).replace('"','')
+	if localETag == serverETag.encode("utf-8") :
+		return False
+	else:
+		return True
 
 ###### AWS Operations ######
 
@@ -77,28 +88,29 @@ def updateDB():
 	if 'Contents' in objectListDict:
 		log("Contents present to update DB")
 		for objects in objectListDict['Contents']:
-			entry = (objects['Key'],objects['ETag'],objects['LastModified']);
+			entry = (objects['Key'],objects['ETag'])
 			insert_entry(conn,entry)
 
-			
+def updateDB(fileName,ETag):
+	log("Updating DB for "+ fileName)
+	entry = (fileName,ETag)
+	insert_entry(conn,entry)	
+	return 	
 
 
 def upload_file(fileName):
-		updateDB()
 		log("Call for upload for file "+ fileName)
 		url = (s3.generate_presigned_url('put_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100))
 		log(" Upload URL fetched "+ url)
 		return json.dumps({'url':url})
 
 def download_file(fileName):
-		updateDB()
 		log("Call for download for file "+ fileName)
 		url = s3.generate_presigned_url('get_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100)
 		log(" Download URL fetched "+ url)
 		return json.dumps({'url':url})
 
 def delete_file(fileName):
-		updateDB()
 		log("Call for delete for file "+ fileName)
 		url = s3.generate_presigned_url('delete_object', Params = {'Bucket': bucketName, 'Key': fileName}, ExpiresIn = 100)
 		log(" Delete URL fetched "+ url)
@@ -106,7 +118,6 @@ def delete_file(fileName):
 
 
 def download_All():
-		updateDB()
 		log("Call for download_All")
 		objectListDict = s3.list_objects(Bucket = bucketName)
 		finalDownloadAllJson = []
@@ -120,7 +131,6 @@ def download_All():
 		return json.dumps({'downloadAll':finalDownloadAllJson})
 
 def upload_All():
-		updateDB()
 		log("Call for upload_All")
 		finalUploadAllJson = []
 		for f in listdir(syncDir):
@@ -134,7 +144,6 @@ def upload_All():
 
 #Sync: Pull before Push
 def sync_All(fileName):
-		updateDB()
 		log("Call for sync_All")
 		finalSyncAllJson =[]
 		downloadAllJson = download_All()
@@ -144,8 +153,21 @@ def sync_All(fileName):
 		return json.dumps({'syncAll':finalSyncAllJson})
 
 def list_All(fileName):
-		updateDB()
 		log("Call for list_All")
+		objectListDict = s3.list_objects(Bucket = bucketName)
+		log(objectListDict)
+		finalListAllJson = []
+		if 'Contents' in objectListDict:
+			for objects in objectListDict['Contents']:
+				itemJson = {'fileName':objects['Key'],'ETag':objects['ETag']}
+				finalListAllJson.append(itemJson)
+				updateDB(objects['Key'],objects['ETag'])
+
+			return json.dumps({'listAll':finalListAllJson})
+		return json.dumps({})
+
+def list_All_Mobile(fileName):
+		log("Call for list_All_Mobile")
 		objectListDict = s3.list_objects(Bucket = bucketName)
 		log(objectListDict)
 		finalListAllJson = []
@@ -170,6 +192,7 @@ switcher = {
 	"uploadAll": upload_All,
 	"syncAll": sync_All,
 	"listAll": list_All,
+	"listAllMobile": list_All_Mobile,
 	"Invalid operation": error
 }
 
@@ -198,20 +221,40 @@ class S(BaseHTTPRequestHandler):
 		func = switcher.get(data["operation"], "Invalid operation")
 
 		fileDetails = data["fileDetails"]
-
+		
 		if type(fileDetails) is dict:
 			fileName = fileDetails["fileName"]
 		else:
 			fileName = fileDetails
 
-		log("File name in "+ data["operation"] + " is "+fileName)
-
-		jsonResponse = func(fileName)
-		if jsonResponse is not None: 
-			self.wfile.write(jsonResponse.encode('utf-8'))
+		if 'localEtag' in data:
+			if is_conflict(fileName,data['localEtag']) == True :
+				self.wfile.write({"conflict": "True"})
+			else:
+				jsonResponse = func(fileName)
+				if jsonResponse is not None: 
+					self.wfile.write(jsonResponse.encode('utf-8'))
+		else:
+			jsonResponse = func(fileName)
+			if jsonResponse is not None: 
+				self.wfile.write(jsonResponse.encode('utf-8'))
 
 def run(server_class=HTTPServer, handler_class=S, port=80):
-	updateDB()
+	database = homeDir+"/deadlinefighters.db"
+
+	if os.path.exists(database):
+		os.rename(homeDir+"/deadlinefighters.db", homeDir+"/deadlinefighters-copy.db")
+
+	create_etag_table = """ CREATE TABLE IF NOT EXISTS etag (
+										fileName text NOT NULL PRIMARY KEY,
+										etag text NOT NULL
+									); """
+	conn = create_connection(database)
+	if conn is not None:
+		create_table(conn, create_etag_table)
+	else:
+		log("Error! Cannot create the database connection.")
+
 	server_address = ('', port)
 	httpd = server_class(server_address, handler_class)
 	log("<------Starting new session------------>")
@@ -222,23 +265,9 @@ def run(server_class=HTTPServer, handler_class=S, port=80):
 if __name__ == "__main__":
 	from sys import argv
 
-	database = homeDir+"/deadlinefighters.db"
-
-	if os.path.exists(database):
-		os.rename(homeDir+"/deadlinefighters.db", homeDir+"/deadlinefighters-copy.db")
-
-	create_etag_table = """ CREATE TABLE IF NOT EXISTS etag (
-										fileName text NOT NULL PRIMARY KEY,
-										etag text NOT NULL,
-										lastModified text NOT NULL
-									); """
-	conn = create_connection(database)
-	if conn is not None:
-		create_table(conn, create_etag_table)
-	else:
-		log("Error! Cannot create the database connection.")
-
 	if len(argv) == 2:
 		run(port=int(argv[1]))
 	else:
 		run()
+
+	
