@@ -68,6 +68,7 @@
 				const httpreq = require('httpreq');
 				const os = require('os');
 				const chokidar = require('chokidar');
+				const mime = require('mime-types');
 			
 				/* Create folder for sync and log */
 				var isMacLike = navigator.platform.match(/(Mac|iPhone|iPod|iPad)/i)?true:false;
@@ -183,6 +184,7 @@
 
 								var xhrUpload = new XMLHttpRequest ();
 								xhrUpload.open("PUT", jsonResponse["url"], true);
+								xhrUpload.setRequestHeader("Content-Type",mime.lookup(dir));
 
 								xhrUpload.onreadystatechange = function () {
 									if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
@@ -218,6 +220,7 @@
 
 								var xhrUpload = new XMLHttpRequest ();
 								xhrUpload.open("PUT", jsonResponse["url"], true);
+								xhrUpload.setRequestHeader("Content-Type",mime.lookup(dir));
 
 								xhrUpload.onreadystatechange = function () {
 									if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
@@ -323,6 +326,7 @@
 
 									var xhrUpload = new XMLHttpRequest ();
 									xhrUpload.open("PUT", obj.url, true);
+									xhrUpload.setRequestHeader("Content-Type",mime.lookup(obj.fileName));
 
 									xhrUpload.onreadystatechange = function () {
 										if(xhrUpload.readyState === 4 && xhrUpload.status === 200){
